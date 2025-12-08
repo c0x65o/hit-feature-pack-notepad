@@ -6,13 +6,12 @@ name: notepad
 version: 1.0.0
 description: "Simple notepad with list view, sharing, and per-user/global scope"
 
-# NEW: Schema contributions (Drizzle tables)
-# These get merged into the project's database via Drizzle migrations
+# Schema contributions (Drizzle tables)
+# The source file is copied into the app's lib/feature-pack-schemas.ts by `hit commit`
+# This is the SINGLE SOURCE OF TRUTH - no duplication in YAML
 schema:
-  tables:
-    - name: notepad_notes
-      file: schema/notepad.ts
-      export: notes
+  source: src/schema/notepad.ts
+  exports: [notes, Note, InsertNote, UpdateNote]
 
 # NEW: API route contributions
 # These define the CRUD endpoints the feature pack expects/provides
