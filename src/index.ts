@@ -19,7 +19,7 @@ import { detail } from './pages/detail';
 import { edit } from './pages/edit';
 import { navContributions } from './nav';
 import { configSchema, configDefaults } from './config';
-import type { FeaturePackModule, FeaturePackMetadata } from '@hit/feature-pack-types';
+import type { FeaturePackModule, FeaturePackMetadata, RouteDefinition } from '@hit/feature-pack-types';
 
 // Page generators - ui-render calls these
 export const pages = {
@@ -27,6 +27,15 @@ export const pages = {
   detail,
   edit,
 };
+
+// Route definitions - maps paths to page generators
+// Used by ui-render to serve /api/ui/routes for dynamic routing
+export const routes: RouteDefinition[] = [
+  { path: '/notepad', page: 'list', priority: 100 },
+  { path: '/notepad/new', page: 'edit', priority: 50 },
+  { path: '/notepad/:id', page: 'detail', priority: 100 },
+  { path: '/notepad/:id/edit', page: 'edit', priority: 50 },
+];
 
 // Navigation contributions
 export { navContributions };
@@ -51,6 +60,7 @@ const notepadModule: FeaturePackModule = {
   configSchema,
   configDefaults,
   metadata,
+  routes,
 };
 
 export default notepadModule;
