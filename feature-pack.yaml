@@ -1,0 +1,90 @@
+# Feature Pack: notepad
+# Schema-driven CRUD notepad with list view, sharing, and per-user/global scope
+# This is the first data-backed feature pack, pioneering schema contributions
+
+name: notepad
+version: 1.0.0
+description: "Simple notepad with list view, sharing, and per-user/global scope"
+
+# NEW: Schema contributions (Drizzle tables)
+# These get merged into the project's database via Drizzle migrations
+schema:
+  tables:
+    - name: notepad_notes
+      file: schema/notepad.ts
+      export: notes
+
+# NEW: API route contributions
+# These define the CRUD endpoints the feature pack expects/provides
+api:
+  routes:
+    - path: /api/notepad
+      methods: [GET, POST]
+      description: "List notes (GET) or create note (POST)"
+    - path: /api/notepad/[id]
+      methods: [GET, PUT, DELETE]
+      description: "Get, update, or delete a specific note"
+    - path: /api/notepad/[id]/share
+      methods: [POST, DELETE]
+      description: "Generate or revoke share link"
+
+# Standard UI surfaces
+surfaces:
+  pages:
+    - id: notepad.list
+      path: /notepad
+      generator: list
+    - id: notepad.detail
+      path: /notepad/[id]
+      generator: detail
+    - id: notepad.edit
+      path: /notepad/new
+      generator: edit
+    - id: notepad.edit-existing
+      path: /notepad/[id]/edit
+      generator: edit
+
+  nav:
+    contributions:
+      - id: notepad.list
+        label: Notes
+        path: /notepad
+        slots: [sidebar.primary]
+        order: 50
+        icon: file-text
+
+# Feature flags (admin-configurable options)
+# Note: notes_per_page removed - that's a user preference, not a feature flag
+config:
+  defaults:
+    sharing_enabled: false      # Allow sharing notes via public link
+    scope: per_user             # 'per_user' or 'global'
+    allow_rich_text: false      # Markdown support
+    show_timestamps: true       # Show created/updated times in list
+    allow_delete: true          # Allow users to delete notes
+
+  schema:
+    type: object
+    properties:
+      sharing_enabled:
+        type: boolean
+        description: "Enable note sharing via public links"
+      scope:
+        type: string
+        enum: [per_user, global]
+        description: "per_user: each user sees own notes. global: all users see all notes"
+      allow_rich_text:
+        type: boolean
+        description: "Enable markdown/rich text editing"
+      show_timestamps:
+        type: boolean
+        description: "Show created and updated timestamps in note list"
+      allow_delete:
+        type: boolean
+        description: "Allow users to delete their notes"
+
+# Dependencies
+dependencies:
+  modules: []                   # No module dependency - runs in project DB
+  feature_packs:
+    - name: nav-shell           # Needs nav for sidebar integration

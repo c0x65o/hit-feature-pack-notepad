@@ -1,0 +1,49 @@
+{
+  "name": "@hit/feature-pack-notepad",
+  "version": "1.0.0",
+  "description": "Notepad feature pack with schema-driven CRUD, list view, sharing, and per-user/global scope",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./pages": {
+      "types": "./dist/pages/index.d.ts",
+      "import": "./dist/pages/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/notepad.d.ts",
+      "import": "./dist/schema/notepad.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "@hit/feature-pack-types": "^1.0.0",
+    "drizzle-orm": "^0.30.0"
+  },
+  "devDependencies": {
+    "@hit/feature-pack-types": "file:../hit-feature-pack-types",
+    "drizzle-orm": "^0.30.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "hit",
+    "feature-pack",
+    "notepad",
+    "notes",
+    "crud",
+    "schema-driven"
+  ],
+  "license": "MIT"
+}
