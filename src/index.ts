@@ -1,66 +1,30 @@
 /**
  * @hit/feature-pack-notepad
  *
- * Schema-driven notepad feature pack with list view, sharing, and per-user/global scope.
- * This is the first data-backed feature pack, pioneering the pattern of feature packs
- * that contribute Drizzle schema and API routes.
+ * Notepad feature pack with CRUD, list view, sharing, and per-user/global scope.
  *
- * Features:
- * - Notes list with DataTable (pagination, search, sort)
- * - Note detail view
- * - Create/edit forms
- * - Optional sharing via public links
- * - Per-user or global scope
- * - Drizzle schema for database integration
+ * @example
+ * ```tsx
+ * import { NoteList, NoteDetail, NoteEdit } from '@hit/feature-pack-notepad';
+ *
+ * // Use in your app's routes
+ * <Route path="/notepad" element={<NoteList />} />
+ * <Route path="/notepad/:id" element={<NoteDetail id={params.id} />} />
+ * <Route path="/notepad/:id/edit" element={<NoteEdit id={params.id} />} />
+ * ```
  */
 
-import { list } from './pages/list';
-import { detail } from './pages/detail';
-import { edit } from './pages/edit';
-import { navContributions } from './nav';
-import { configSchema, configDefaults } from './config';
-import type { FeaturePackModule, FeaturePackMetadata, RouteDefinition } from '@hit/feature-pack-types';
+// Pages
+export * from './pages/index';
 
-// Page generators - ui-render calls these
-export const pages = {
-  list,
-  detail,
-  edit,
-};
+// Components
+export * from './components/index';
 
-// Route definitions - maps paths to page generators
-// Used by ui-render to serve /api/ui/routes for dynamic routing
-export const routes: RouteDefinition[] = [
-  { path: '/notepad', page: 'list', priority: 100 },
-  { path: '/notepad/new', page: 'edit', priority: 50 },
-  { path: '/notepad/:id', page: 'detail', priority: 100 },
-  { path: '/notepad/:id/edit', page: 'edit', priority: 50 },
-];
+// Hooks
+export * from './hooks/index';
 
-// Navigation contributions
-export { navContributions };
-
-// Config schema for CAC admin
-export { configSchema, configDefaults };
+// Navigation config
+export { navContributions as nav } from './nav';
 
 // Schema exports - for projects to import into their schema
 export { notes, type Note, type InsertNote, type UpdateNote } from './schema/notepad';
-
-// Feature pack metadata
-export const metadata: FeaturePackMetadata = {
-  name: 'notepad',
-  version: '1.0.0',
-  description: 'Simple notepad with list view, sharing, and per-user/global scope',
-};
-
-// Export the full module interface
-const notepadModule: FeaturePackModule = {
-  pages,
-  navContributions,
-  configSchema,
-  configDefaults,
-  metadata,
-  routes,
-};
-
-export default notepadModule;

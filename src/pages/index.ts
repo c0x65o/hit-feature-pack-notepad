@@ -1,9 +1,7 @@
 /**
- * Page generators index
- *
- * Re-exports all page generators for the notepad feature pack.
+ * Notepad Pages
  */
 
-export { list } from './list';
-export { detail } from './detail';
-export { edit } from './edit';
+export { NoteList, default as NoteListPage } from './List';
+export { NoteDetail, default as NoteDetailPage } from './Detail';
+export { NoteEdit, default as NoteEditPage } from './Edit';

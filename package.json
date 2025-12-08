@@ -1,18 +1,14 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "1.0.5",
-  "description": "Notepad feature pack with schema-driven CRUD, list view, sharing, and per-user/global scope",
+  "version": "2.0.1",
+  "description": "Notepad feature pack with CRUD, list view, sharing, and per-user/global scope",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./pages": {
-      "types": "./dist/pages/index.d.ts",
-      "import": "./dist/pages/index.js"
+      "import": "./dist/index.js"
     },
     "./schema": {
       "types": "./dist/schema/notepad.d.ts",
@@ -21,20 +17,25 @@
   },
   "files": [
     "dist",
-    "src"
+    "feature-pack.yaml"
   ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
+  "dependencies": {},
   "peerDependencies": {
-    "@hit/feature-pack-types": "^1.0.0",
+    "react": "^18.0.0 || ^19.0.0",
+    "next": "^14.0.0 || ^15.0.0",
+    "@hit/sdk": "*",
+    "lucide-react": "^0.400.0",
     "drizzle-orm": "^0.30.0"
   },
   "devDependencies": {
-    "@hit/feature-pack-types": "file:../hit-feature-pack-types",
+    "@types/react": "^18.2.0",
     "drizzle-orm": "^0.30.0",
+    "lucide-react": "^0.460.0",
     "typescript": "^5.0.0"
   },
   "keywords": [
@@ -42,8 +43,7 @@
     "feature-pack",
     "notepad",
     "notes",
-    "crud",
-    "schema-driven"
+    "crud"
   ],
   "license": "MIT"
 }

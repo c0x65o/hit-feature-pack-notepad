@@ -1,20 +1,53 @@
 # Feature Pack: notepad
-# Schema-driven CRUD notepad with list view, sharing, and per-user/global scope
-# This is the first data-backed feature pack, pioneering schema contributions
+# Notepad with CRUD, list view, sharing, and per-user/global scope
 
 name: notepad
-version: 1.0.0
-description: "Simple notepad with list view, sharing, and per-user/global scope"
+version: 2.0.0
+description: Notepad feature pack with CRUD, list view, sharing, and per-user/global scope
+
+# Route definitions - mapped to React components
+routes:
+  - path: /notepad
+    page: NoteList
+    roles: []  # Empty = authenticated users only
+  - path: /notepad/new
+    page: NoteEdit
+    roles: []
+  - path: /notepad/[id]
+    page: NoteDetail
+    roles: []
+  - path: /notepad/[id]/edit
+    page: NoteEdit
+    roles: []
+
+# Navigation contributions - auto-added to shell sidebar
+nav:
+  - id: notepad
+    label: Notes
+    path: /notepad
+    icon: FileText
+    showWhen: authenticated
+
+# Notification types this pack can emit
+notifications:
+  types:
+    - id: note_created
+      title: Note Created
+      icon: FileText
+      priority: low
+    - id: note_shared
+      title: Note Shared
+      icon: Share2
+      priority: medium
 
 # Schema contributions (Drizzle tables)
-# The source file is copied into the app's lib/feature-pack-schemas.ts by `hit commit`
-# This is the SINGLE SOURCE OF TRUTH - no duplication in YAML
+# Projects import these into their schema
 schema:
   source: src/schema/notepad.ts
   exports: [notes, Note, InsertNote, UpdateNote]
 
-# NEW: API route contributions
-# These define the CRUD endpoints the feature pack expects/provides
+# API routes the feature pack expects
+# Projects create these routes using the schema
 api:
   routes:
     - path: /api/notepad
@@ -27,63 +60,36 @@ api:
       methods: [POST, DELETE]
       description: "Generate or revoke share link"
 
-# Standard UI surfaces
-surfaces:
-  pages:
-    - id: notepad.list
-      path: /notepad
-      generator: list
-    - id: notepad.detail
-      path: /notepad/[id]
-      generator: detail
-    - id: notepad.edit
-      path: /notepad/new
-      generator: edit
-    - id: notepad.edit-existing
-      path: /notepad/[id]/edit
-      generator: edit
+# No module dependencies - runs on project's own database
+requires:
+  modules: []
 
-  nav:
-    contributions:
-      - id: notepad.list
-        label: Notes
-        path: /notepad
-        slots: [sidebar.primary]
-        order: 50
-        icon: file-text
-
-# Feature flags (admin-configurable options)
-# Note: notes_per_page removed - that's a user preference, not a feature flag
-config:
-  defaults:
-    sharing_enabled: false      # Allow sharing notes via public link
-    scope: per_user             # 'per_user' or 'global'
-    allow_rich_text: false      # Markdown support
-    show_timestamps: true       # Show created/updated times in list
-    allow_delete: true          # Allow users to delete notes
-
-  schema:
-    type: object
-    properties:
-      sharing_enabled:
-        type: boolean
-        description: "Enable note sharing via public links"
-      scope:
-        type: string
-        enum: [per_user, global]
-        description: "per_user: each user sees own notes. global: all users see all notes"
-      allow_rich_text:
-        type: boolean
-        description: "Enable markdown/rich text editing"
-      show_timestamps:
-        type: boolean
-        description: "Show created and updated timestamps in note list"
-      allow_delete:
-        type: boolean
-        description: "Allow users to delete their notes"
-
-# Dependencies
+# Dependencies on other feature packs
 dependencies:
-  modules: []                   # No module dependency - runs in project DB
   feature_packs:
-    - name: nav-shell           # Needs nav for sidebar integration
+    - name: dashboard-shell
+
+# Configurable options
+config:
+  schema:
+    scope:
+      type: string
+      default: per_user
+      enum: [per_user, global]
+      description: "per_user: each user sees own notes. global: all users see all notes"
+    sharing_enabled:
+      type: boolean
+      default: false
+      description: "Enable note sharing via public links"
+    allow_rich_text:
+      type: boolean
+      default: false
+      description: "Enable markdown/rich text editing"
+    show_timestamps:
+      type: boolean
+      default: true
+      description: "Show created/updated timestamps in list"
+    allow_delete:
+      type: boolean
+      default: true
+      description: "Allow users to delete notes"
