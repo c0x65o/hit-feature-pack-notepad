@@ -1,6 +1,6 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Notepad feature pack with schema-driven CRUD, list view, sharing, and per-user/global scope",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
