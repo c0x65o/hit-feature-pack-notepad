@@ -149,7 +149,7 @@ export function NoteDetail({
     <Page
       title={note.title}
       actions={
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={() => navigate('/notepad')}>
             <ArrowLeft size={16} className="mr-2" />
             Back
@@ -167,7 +167,7 @@ export function NoteDetail({
           {allowDelete && (
             <Button variant="danger" onClick={handleDelete} disabled={mutating}>
               <Trash2 size={16} className="mr-2" />
-              Erase
+              Delete
             </Button>
           )}
         </div>
