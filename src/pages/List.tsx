@@ -92,7 +92,7 @@ export function NoteList({
     >
       {/* Search */}
       <Card>
-        <form onSubmit={handleSearch} className="flex gap-3 items-end">
+        <form onSubmit={handleSearch} className="flex gap-3 items-end p-6">
           <div className="flex-1 max-w-md">
             <Input
               label="Search"
@@ -187,7 +187,7 @@ export function NoteList({
                 label: '',
                 align: 'right' as const,
                 render: (_, row) => (
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-2">
                     <Button variant="ghost" size="sm" onClick={() => navigate(`/notepad/${row.id}`)}>
                       <Eye size={16} />
                     </Button>
@@ -225,28 +225,28 @@ export function NoteList({
 
           {/* Pagination */}
           {data.total_pages > 1 && (
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800">
+            <div className="flex items-center justify-between px-6 py-4 mt-6 border-t border-gray-800">
               <p className="text-sm text-gray-400">
                 Page {data.page} of {data.total_pages} ({data.total} notes)
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="md"
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
                 >
-                  <ChevronLeft size={16} className="mr-1" />
+                  <ChevronLeft size={16} className="mr-2" />
                   Previous
                 </Button>
                 <Button
                   variant="secondary"
-                  size="sm"
+                  size="md"
                   disabled={page >= data.total_pages}
                   onClick={() => setPage(page + 1)}
                 >
                   Next
-                  <ChevronRight size={16} className="ml-1" />
+                  <ChevronRight size={16} className="ml-2" />
                 </Button>
               </div>
             </div>

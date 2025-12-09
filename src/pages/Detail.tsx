@@ -149,7 +149,7 @@ export function NoteDetail({
     <Page
       title={note.title}
       actions={
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button variant="secondary" onClick={() => navigate('/notepad')}>
             <ArrowLeft size={16} className="mr-2" />
             Back
@@ -176,10 +176,14 @@ export function NoteDetail({
       {/* Share Status */}
       {sharingEnabled && note.isPublic && (
         <Alert variant="success" title="Shared">
-          This note is publicly shared.
-          <Button variant="ghost" size="sm" onClick={handleUnshare}>
-            Stop Sharing
-          </Button>
+          <div className="flex items-center justify-between">
+            <span>This note is publicly shared.</span>
+            <div className="ml-4">
+              <Button variant="ghost" size="sm" onClick={handleUnshare}>
+                Stop Sharing
+              </Button>
+            </div>
+          </div>
         </Alert>
       )}
 
@@ -187,14 +191,14 @@ export function NoteDetail({
       <Card
         footer={
           showTimestamps ? (
-            <div className="flex items-center justify-between text-sm text-gray-400">
+            <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-400">
               <span>Created {formatDate(note.createdAt)}</span>
               <span>Updated {formatDate(note.updatedAt)}</span>
             </div>
           ) : undefined
         }
       >
-        <div className="prose prose-invert max-w-none">
+        <div className="prose prose-invert max-w-none p-6">
           <p className="whitespace-pre-wrap text-gray-100">{note.content || 'No content'}</p>
         </div>
       </Card>
@@ -207,12 +211,12 @@ export function NoteDetail({
         description="Anyone with this link can view your note"
       >
         <div className="space-y-4">
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <input
               type="text"
               value={shareUrl || ''}
               readOnly
-              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-100"
+              className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-100"
             />
             <Button
               variant={copied ? 'secondary' : 'primary'}
@@ -222,7 +226,7 @@ export function NoteDetail({
               {copied ? 'Copied!' : 'Copy'}
             </Button>
           </div>
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={handleUnshare}>
               Stop Sharing
             </Button>
