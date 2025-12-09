@@ -26,6 +26,7 @@ nav:
     label: Notes
     path: /notepad
     icon: FileText
+    group: main  # Primary business features
     showWhen: authenticated
     weight: 200  # Primary content near top (lower weight = higher position)
 
