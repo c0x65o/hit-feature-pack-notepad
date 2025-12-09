@@ -167,7 +167,7 @@ export function NoteDetail({
           {allowDelete && (
             <Button variant="danger" onClick={handleDelete} disabled={mutating}>
               <Trash2 size={16} className="mr-2" />
-              Delete
+              Delete1
             </Button>
           )}
         </div>
