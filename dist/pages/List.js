@@ -1,14 +1,13 @@
 'use client';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, Share2, FileText, ChevronLeft, ChevronRight, } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, Share2, FileText, ChevronLeft, ChevronRight, } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
 import { useNotes, useNoteMutations } from '../hooks/useNotepad';
 export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = false, allowDelete = true, }) {
     const { Page, Card, Button, Input, Table, Badge, EmptyState, Alert, Spinner } = useUi();
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState('');
-    const [searchInput, setSearchInput] = useState('');
     const { data, loading, error, refresh } = useNotes({
         page,
         pageSize: 25,
@@ -25,9 +24,8 @@ export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = f
             window.location.href = path;
         }
     };
-    const handleSearch = (e) => {
-        e.preventDefault();
-        setSearch(searchInput);
+    const handleSearchChange = (value) => {
+        setSearch(value);
         setPage(1);
     };
     const handleDelete = async (id, title) => {
@@ -50,7 +48,7 @@ export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = f
             year: 'numeric',
         });
     };
-    return (_jsxs(Page, { title: "Notes", description: "Your personal notes", actions: _jsxs(Button, { variant: "primary", onClick: () => navigate('/notepad/new'), children: [_jsx(Plus, { size: 16, className: "mr-2" }), "New Note"] }), children: [_jsx(Card, { children: _jsxs("form", { onSubmit: handleSearch, className: "flex gap-3 items-end", children: [_jsx("div", { className: "flex-1 max-w-md", children: _jsx(Input, { label: "Search", value: searchInput, onChange: setSearchInput, placeholder: "Search notes..." }) }), _jsxs(Button, { type: "submit", variant: "secondary", children: [_jsx(Search, { size: 16, className: "mr-2" }), "Search"] })] }) }), error && (_jsx(Alert, { variant: "error", title: "Error loading notes", children: error.message })), loading && (_jsx(Card, { children: _jsx("div", { className: "flex items-center justify-center py-12", children: _jsx(Spinner, { size: "lg" }) }) })), !loading && !error && data?.items.length === 0 && (_jsx(Card, { children: _jsx(EmptyState, { icon: _jsx(FileText, { size: 48 }), title: "No notes yet", description: "Create your first note to get started", action: _jsxs(Button, { variant: "primary", onClick: () => navigate('/notepad/new'), children: [_jsx(Plus, { size: 16, className: "mr-2" }), "Create Note"] }) }) })), !loading && data && data.items.length > 0 && (_jsxs(Card, { children: [_jsx(Table, { columns: [
+    return (_jsxs(Page, { title: "Notes", description: "Your personal notes", actions: _jsxs(Button, { variant: "primary", onClick: () => navigate('/notepad/new'), children: [_jsx(Plus, { size: 16, className: "mr-2" }), "New Note"] }), children: [_jsx(Card, { children: _jsx("div", { className: "max-w-md", children: _jsx(Input, { label: "Search", value: search, onChange: handleSearchChange, placeholder: "Search notes..." }) }) }), error && (_jsx(Alert, { variant: "error", title: "Error loading notes", children: error.message })), loading && (_jsx(Card, { children: _jsx("div", { className: "flex items-center justify-center py-12", children: _jsx(Spinner, { size: "lg" }) }) })), !loading && !error && data?.items.length === 0 && (_jsx(Card, { children: _jsx(EmptyState, { icon: _jsx(FileText, { size: 48 }), title: "No notes yet", description: "Create your first note to get started", action: _jsxs(Button, { variant: "primary", onClick: () => navigate('/notepad/new'), children: [_jsx(Plus, { size: 16, className: "mr-2" }), "Create Note"] }) }) })), !loading && data && data.items.length > 0 && (_jsxs(Card, { children: [_jsx(Table, { columns: [
                             {
                                 key: 'title',
                                 label: 'Title',

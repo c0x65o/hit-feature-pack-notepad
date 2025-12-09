@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   Plus,
-  Search,
   Eye,
   Edit,
   Trash2,
@@ -32,7 +31,6 @@ export function NoteList({
   
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState('');
   
   const { data, loading, error, refresh } = useNotes({
     page,
@@ -52,9 +50,8 @@ export function NoteList({
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearch(searchInput);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setPage(1);
   };
 
@@ -92,20 +89,14 @@ export function NoteList({
     >
       {/* Search */}
       <Card>
-        <form onSubmit={handleSearch} className="flex gap-3 items-end">
-          <div className="flex-1 max-w-md">
-            <Input
-              label="Search"
-              value={searchInput}
-              onChange={setSearchInput}
-              placeholder="Search notes..."
-            />
-          </div>
-          <Button type="submit" variant="secondary">
-            <Search size={16} className="mr-2" />
-            Search
-          </Button>
-        </form>
+        <div className="max-w-md">
+          <Input
+            label="Search"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search notes..."
+          />
+        </div>
       </Card>
 
       {/* Error State */}
