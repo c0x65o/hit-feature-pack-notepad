@@ -1,11 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
-import { Button } from '../components/Button';
-import { PageHeader } from '../components/PageHeader';
-import { Card } from '../components/Card';
-import { FormInput, FormTextArea } from '../components/FormInput';
+import { ArrowLeft, Save } from 'lucide-react';
+import { useUi } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 
 interface NoteEditProps {
@@ -19,6 +16,8 @@ export function NoteEdit({
   onNavigate,
   allowRichText = false,
 }: NoteEditProps) {
+  const { Page, Card, Button, Input, TextArea, Alert, Spinner } = useUi();
+  
   const isNew = !id || id === 'new';
   const { note, loading: loadingNote, error: loadError } = useNote(isNew ? undefined : id);
   const { createNote, updateNote, loading: saving, error: saveError } = useNoteMutations();
@@ -85,92 +84,87 @@ export function NoteEdit({
   // Loading state for edit mode
   if (!isNew && loadingNote) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-[var(--hit-muted)] rounded w-1/3 mb-4" />
-          <div className="bg-[var(--hit-surface)] rounded-lg p-6 space-y-4">
-            <div className="h-10 bg-[var(--hit-muted)] rounded w-full" />
-            <div className="h-32 bg-[var(--hit-muted)] rounded w-full" />
+      <Page title="Loading...">
+        <Card>
+          <div className="flex items-center justify-center py-12">
+            <Spinner size="lg" />
           </div>
-        </div>
-      </div>
+        </Card>
+      </Page>
     );
   }
 
   // Error loading note
   if (!isNew && loadError) {
     return (
-      <div className="space-y-6">
-        <PageHeader
-          title="Note Not Found"
-          actions={
-            <Button variant="outline" icon={ArrowLeft} onClick={() => navigate('/notepad')}>
-              Back to Notes
-            </Button>
-          }
-        />
-        <div className="p-4 bg-[var(--hit-error-light)] border border-[var(--hit-error)] rounded-lg">
-          <p className="text-sm text-[var(--hit-error)]">{loadError.message}</p>
-        </div>
-      </div>
+      <Page
+        title="Note Not Found"
+        actions={
+          <Button variant="secondary" onClick={() => navigate('/notepad')}>
+            <ArrowLeft size={16} className="mr-2" />
+            Back to Notes
+          </Button>
+        }
+      >
+        <Alert variant="error" title="Error">
+          {loadError.message}
+        </Alert>
+      </Page>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={isNew ? 'New Note' : 'Edit Note'}
-        actions={
-          <Button variant="outline" icon={ArrowLeft} onClick={handleCancel}>
-            Cancel
-          </Button>
-        }
-      />
-
+    <Page
+      title={isNew ? 'New Note' : 'Edit Note'}
+      actions={
+        <Button variant="secondary" onClick={handleCancel}>
+          <ArrowLeft size={16} className="mr-2" />
+          Cancel
+        </Button>
+      }
+    >
       {/* Save Error */}
       {saveError && (
-        <div className="p-4 bg-[var(--hit-error-light)] border border-[var(--hit-error)] rounded-lg">
-          <p className="text-sm text-[var(--hit-error)]">{saveError.message}</p>
-        </div>
+        <Alert variant="error" title="Error saving note">
+          {saveError.message}
+        </Alert>
       )}
 
       <Card>
-        <form onSubmit={handleSubmit}>
-          <FormInput
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <Input
             label="Title"
-            type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={setTitle}
             placeholder="Enter note title..."
             required
             error={fieldErrors.title}
-            autoFocus
           />
 
-          <FormTextArea
+          <TextArea
             label="Content"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={setContent}
             placeholder={
               allowRichText
                 ? 'Write your note... (Markdown supported)'
                 : 'Write your note...'
             }
             rows={15}
-            helpText={allowRichText ? 'Markdown formatting is supported' : undefined}
           />
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--hit-border)]">
-            <Button type="button" variant="outline" onClick={handleCancel}>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-800">
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" icon={Save} loading={saving}>
+            <Button type="submit" variant="primary" loading={saving}>
+              <Save size={16} className="mr-2" />
               {isNew ? 'Create Note' : 'Save Changes'}
             </Button>
           </div>
         </form>
       </Card>
-    </div>
+    </Page>
   );
 }
 

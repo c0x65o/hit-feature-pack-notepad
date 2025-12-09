@@ -1,7 +1,7 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "2.0.1",
-  "description": "Notepad feature pack with CRUD, list view, sharing, and per-user/global scope",
+  "version": "3.0.1",
+  "description": "Notepad feature pack with CRUD, list view, sharing, and per-user/global scope. Uses @hit/ui-kit for shell-agnostic UI.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -24,7 +24,9 @@
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@hit/ui-kit": "file:../hit-ui-kit"
+  },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
     "next": "^14.0.0 || ^15.0.0",
@@ -43,7 +45,8 @@
     "feature-pack",
     "notepad",
     "notes",
-    "crud"
+    "crud",
+    "ui-kit"
   ],
   "license": "MIT"
 }
