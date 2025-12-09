@@ -191,14 +191,14 @@ export function NoteDetail({
       <Card
         footer={
           showTimestamps ? (
-            <div className="flex items-center justify-between px-6 py-4 text-sm text-gray-400">
+            <div className="flex items-center justify-between text-sm text-gray-400">
               <span>Created {formatDate(note.createdAt)}</span>
               <span>Updated {formatDate(note.updatedAt)}</span>
             </div>
           ) : undefined
         }
       >
-        <div className="prose prose-invert max-w-none p-6">
+        <div className="prose prose-invert max-w-none">
           <p className="whitespace-pre-wrap text-gray-100">{note.content || 'No content'}</p>
         </div>
       </Card>

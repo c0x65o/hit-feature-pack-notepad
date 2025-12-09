@@ -92,7 +92,7 @@ export function NoteList({
     >
       {/* Search */}
       <Card>
-        <form onSubmit={handleSearch} className="flex gap-3 items-end p-6">
+        <form onSubmit={handleSearch} className="flex gap-3 items-end">
           <div className="flex-1 max-w-md">
             <Input
               label="Search"
@@ -225,7 +225,7 @@ export function NoteList({
 
           {/* Pagination */}
           {data.total_pages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 mt-6 border-t border-gray-800">
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800">
               <p className="text-sm text-gray-400">
                 Page {data.page} of {data.total_pages} ({data.total} notes)
               </p>

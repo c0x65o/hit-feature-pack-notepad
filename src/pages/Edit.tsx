@@ -131,7 +131,7 @@ export function NoteEdit({
       )}
 
       <Card>
-        <form onSubmit={handleSubmit} className="space-y-6 p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             label="Title"
             value={title}
@@ -153,7 +153,7 @@ export function NoteEdit({
             rows={15}
           />
 
-          <div className="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-gray-800">
+          <div className="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-800">
             <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
