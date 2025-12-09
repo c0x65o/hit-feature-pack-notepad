@@ -27,6 +27,7 @@ nav:
     path: /notepad
     icon: FileText
     showWhen: authenticated
+    weight: 200  # Primary content near top (lower weight = higher position)
 
 # Notification types this pack can emit
 notifications:
