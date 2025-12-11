@@ -2,6 +2,8 @@
  * Notepad API hooks
  */
 
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
 
 export interface Note {

@@ -1,6 +1,7 @@
 /**
  * Notepad API hooks
  */
+'use client';
 import { useState, useEffect, useCallback } from 'react';
 // API base - uses project's local API routes
 const API_BASE = '/api/notepad';
