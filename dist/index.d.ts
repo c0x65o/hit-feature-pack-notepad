@@ -3,6 +3,9 @@
  *
  * Notepad feature pack with CRUD, list view, sharing, and per-user/global scope.
  *
+ * Components are exported individually for optimal tree-shaking.
+ * When used with the route loader system, only the requested component is bundled.
+ *
  * @example
  * ```tsx
  * import { NoteList, NoteDetail, NoteEdit } from '@hit/feature-pack-notepad';
@@ -13,7 +16,7 @@
  * <Route path="/notepad/:id/edit" element={<NoteEdit id={params.id} />} />
  * ```
  */
-export * from './pages/index';
+export { NoteList, NoteListPage, NoteDetail, NoteDetailPage, NoteEdit, NoteEditPage, } from './pages/index';
 export * from './components/index';
 export * from './hooks/index';
 export { navContributions as nav } from './nav';

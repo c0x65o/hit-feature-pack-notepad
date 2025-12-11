@@ -1,5 +1,8 @@
 /**
  * Notepad Pages
+ * 
+ * Using direct exports for optimal tree-shaking and code splitting.
+ * Each component is only bundled when actually imported/used.
  */
 
 export { NoteList, default as NoteListPage } from './List';
