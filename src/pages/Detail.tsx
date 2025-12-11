@@ -191,15 +191,15 @@ export function NoteDetail({
       <Card
         footer={
           showTimestamps ? (
-            <div className="flex items-center justify-between text-sm text-gray-400">
+            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Created {formatDate(note.createdAt)}</span>
               <span>Updated {formatDate(note.updatedAt)}</span>
             </div>
           ) : undefined
         }
       >
-        <div className="prose prose-invert max-w-none">
-          <p className="whitespace-pre-wrap text-gray-100">{note.content || 'No content'}</p>
+        <div className="prose dark:prose-invert max-w-none">
+          <p className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">{note.content || 'No content'}</p>
         </div>
       </Card>
 
@@ -216,7 +216,7 @@ export function NoteDetail({
               type="text"
               value={shareUrl || ''}
               readOnly
-              className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-gray-100"
+              className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100"
             />
             <Button
               variant={copied ? 'secondary' : 'primary'}
