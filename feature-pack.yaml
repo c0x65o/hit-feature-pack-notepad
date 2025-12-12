@@ -8,16 +8,16 @@ description: Notepad feature pack with CRUD, list view, sharing, and per-user/gl
 # Route definitions - mapped to React components
 routes:
   - path: /notepad
-    page: NoteList
+    page: List
     roles: []  # Empty = authenticated users only
   - path: /notepad/new
-    page: NoteEdit
+    page: Edit
     roles: []
   - path: /notepad/[id]
-    page: NoteDetail
+    page: Detail
     roles: []
   - path: /notepad/[id]/edit
-    page: NoteEdit
+    page: Edit
     roles: []
 
 # Navigation contributions - auto-added to shell sidebar
