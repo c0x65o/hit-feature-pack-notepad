@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save } from 'lucide-react';
-import { useUi } from '@hit/ui-kit';
+import { ArrowLeft, Save, StickyNote } from 'lucide-react';
+import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 
 interface NoteEditProps {
@@ -113,9 +113,17 @@ export function NoteEdit({
     );
   }
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Notepad', href: '/notepad', icon: <StickyNote size={14} /> },
+    ...(!isNew && note ? [{ label: note.title, href: `/notepad/${id}` }] : []),
+    { label: isNew ? 'New' : 'Edit' },
+  ];
+
   return (
     <Page
       title={isNew ? 'New Note' : 'Edit Note'}
+      breadcrumbs={breadcrumbs}
+      onNavigate={navigate}
       actions={
         <Button variant="secondary" onClick={handleCancel}>
           <ArrowLeft size={16} className="mr-2" />

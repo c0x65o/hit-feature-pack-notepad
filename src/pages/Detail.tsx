@@ -8,8 +8,9 @@ import {
   Share2,
   Copy,
   Check,
+  StickyNote,
 } from 'lucide-react';
-import { useUi } from '@hit/ui-kit';
+import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 
 interface NoteDetailProps {
@@ -145,15 +146,18 @@ export function NoteDetail({
     return null;
   }
 
+  const breadcrumbs: BreadcrumbItem[] = [
+    { label: 'Notepad', href: '/notepad', icon: <StickyNote size={14} /> },
+    { label: note.title },
+  ];
+
   return (
     <Page
       title={note.title}
+      breadcrumbs={breadcrumbs}
+      onNavigate={navigate}
       actions={
         <div className="flex items-center gap-3">
-          <Button variant="secondary" onClick={() => navigate('/notepad')}>
-            <ArrowLeft size={16} className="mr-2" />
-            Back
-          </Button>
           <Button variant="primary" onClick={() => navigate(`/notepad/${note.id}/edit`)}>
             <Edit size={16} className="mr-2" />
             Edit
