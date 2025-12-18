@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
+import { NoteAclModal } from '../components/NoteAclModal';
+import { Users } from 'lucide-react';
 
 interface NoteDetailProps {
   id?: string;
@@ -34,6 +36,7 @@ export function NoteDetail({
   const { deleteNote, shareNote, unshareNote, loading: mutating } = useNoteMutations();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showAclModal, setShowAclModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const navigate = (path: string) => {
@@ -162,10 +165,14 @@ export function NoteDetail({
             <Edit size={16} className="mr-2" />
             Edit
           </Button>
+          <Button variant="secondary" onClick={() => setShowAclModal(true)}>
+            <Users size={16} className="mr-2" />
+            Share
+          </Button>
           {sharingEnabled && (
             <Button variant="secondary" onClick={handleShare} disabled={mutating}>
               <Share2 size={16} className="mr-2" />
-              {note.isPublic ? 'Manage Share' : 'Share'}
+              {note.isPublic ? 'Manage Share' : 'Share Link'}
             </Button>
           )}
           {allowDelete && (
@@ -240,6 +247,18 @@ export function NoteDetail({
           </div>
         </div>
       </Modal>
+
+      {/* ACL Modal */}
+      {showAclModal && (
+        <NoteAclModal
+          noteId={note.id}
+          isOpen={showAclModal}
+          onClose={() => setShowAclModal(false)}
+          onUpdate={() => {
+            // Optionally refresh note data if needed
+          }}
+        />
+      )}
     </Page>
   );
 }

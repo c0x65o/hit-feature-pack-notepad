@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Save, StickyNote } from 'lucide-react';
+import { ArrowLeft, Save, StickyNote, Users } from 'lucide-react';
 import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
+import { NoteAclModal } from '../components/NoteAclModal';
 
 interface NoteEditProps {
   id?: string;
@@ -25,6 +26,7 @@ export function NoteEdit({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showAclModal, setShowAclModal] = useState(false);
 
   // Populate form when note loads
   useEffect(() => {
@@ -125,10 +127,18 @@ export function NoteEdit({
       breadcrumbs={breadcrumbs}
       onNavigate={navigate}
       actions={
-        <Button variant="secondary" onClick={handleCancel}>
-          <ArrowLeft size={16} className="mr-2" />
-          Cancel
-        </Button>
+        <div className="flex items-center gap-3">
+          {!isNew && id && (
+            <Button variant="secondary" onClick={() => setShowAclModal(true)}>
+              <Users size={16} className="mr-2" />
+              Share
+            </Button>
+          )}
+          <Button variant="secondary" onClick={handleCancel}>
+            <ArrowLeft size={16} className="mr-2" />
+            Cancel
+          </Button>
+        </div>
       }
     >
       {/* Save Error */}
@@ -172,6 +182,18 @@ export function NoteEdit({
           </div>
         </form>
       </Card>
+
+      {/* ACL Modal */}
+      {!isNew && id && showAclModal && (
+        <NoteAclModal
+          noteId={id}
+          isOpen={showAclModal}
+          onClose={() => setShowAclModal(false)}
+          onUpdate={() => {
+            // Optionally refresh note data if needed
+          }}
+        />
+      )}
     </Page>
   );
 }

@@ -1,9 +1,10 @@
 'use client';
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, StickyNote } from 'lucide-react';
+import { ArrowLeft, Save, StickyNote, Users } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
+import { NoteAclModal } from '../components/NoteAclModal';
 export function NoteEdit({ id, onNavigate, allowRichText = false, }) {
     const { Page, Card, Button, Input, TextArea, Alert, Spinner } = useUi();
     const isNew = !id || id === 'new';
@@ -12,6 +13,7 @@ export function NoteEdit({ id, onNavigate, allowRichText = false, }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
+    const [showAclModal, setShowAclModal] = useState(false);
     // Populate form when note loads
     useEffect(() => {
         if (note) {
@@ -77,9 +79,11 @@ export function NoteEdit({ id, onNavigate, allowRichText = false, }) {
         ...(!isNew && note ? [{ label: note.title, href: `/notepad/${id}` }] : []),
         { label: isNew ? 'New' : 'Edit' },
     ];
-    return (_jsxs(Page, { title: isNew ? 'New Note' : 'Edit Note', breadcrumbs: breadcrumbs, onNavigate: navigate, actions: _jsxs(Button, { variant: "secondary", onClick: handleCancel, children: [_jsx(ArrowLeft, { size: 16, className: "mr-2" }), "Cancel"] }), children: [saveError && (_jsx(Alert, { variant: "error", title: "Error saving note", children: saveError.message })), _jsx(Card, { children: _jsxs("form", { onSubmit: handleSubmit, className: "space-y-6", children: [_jsx(Input, { label: "Title", value: title, onChange: setTitle, placeholder: "Enter note title...", required: true, error: fieldErrors.title }), _jsx(TextArea, { label: "Content", value: content, onChange: setContent, placeholder: allowRichText
+    return (_jsxs(Page, { title: isNew ? 'New Note' : 'Edit Note', breadcrumbs: breadcrumbs, onNavigate: navigate, actions: _jsxs("div", { className: "flex items-center gap-3", children: [!isNew && id && (_jsxs(Button, { variant: "secondary", onClick: () => setShowAclModal(true), children: [_jsx(Users, { size: 16, className: "mr-2" }), "Share"] })), _jsxs(Button, { variant: "secondary", onClick: handleCancel, children: [_jsx(ArrowLeft, { size: 16, className: "mr-2" }), "Cancel"] })] }), children: [saveError && (_jsx(Alert, { variant: "error", title: "Error saving note", children: saveError.message })), _jsx(Card, { children: _jsxs("form", { onSubmit: handleSubmit, className: "space-y-6", children: [_jsx(Input, { label: "Title", value: title, onChange: setTitle, placeholder: "Enter note title...", required: true, error: fieldErrors.title }), _jsx(TextArea, { label: "Content", value: content, onChange: setContent, placeholder: allowRichText
                                 ? 'Write your note... (Markdown supported)'
-                                : 'Write your note...', rows: 15 }), _jsxs("div", { className: "flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-800", children: [_jsx(Button, { type: "button", variant: "secondary", onClick: handleCancel, children: "Cancel" }), _jsxs(Button, { type: "submit", variant: "primary", loading: saving, children: [_jsx(Save, { size: 16, className: "mr-2" }), isNew ? 'Create Note' : 'Save Changes'] })] })] }) })] }));
+                                : 'Write your note...', rows: 15 }), _jsxs("div", { className: "flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-800", children: [_jsx(Button, { type: "button", variant: "secondary", onClick: handleCancel, children: "Cancel" }), _jsxs(Button, { type: "submit", variant: "primary", loading: saving, children: [_jsx(Save, { size: 16, className: "mr-2" }), isNew ? 'Create Note' : 'Save Changes'] })] })] }) }), !isNew && id && showAclModal && (_jsx(NoteAclModal, { noteId: id, isOpen: showAclModal, onClose: () => setShowAclModal(false), onUpdate: () => {
+                    // Optionally refresh note data if needed
+                } }))] }));
 }
 export default NoteEdit;
 //# sourceMappingURL=Edit.js.map

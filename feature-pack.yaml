@@ -2,7 +2,6 @@
 # Notepad with CRUD, list view, sharing, and per-user/global scope
 
 name: notepad
-version: 2.0.0
 description: Notepad feature pack with CRUD, list view, sharing, and per-user/global scope
 
 # Route definitions - mapped to React components
@@ -46,7 +45,7 @@ notifications:
 # Projects import these into their schema
 schema:
   source: src/schema/notepad.ts
-  exports: [notes, Note, InsertNote, UpdateNote]
+  exports: [notes, Note, InsertNote, UpdateNote, noteAcls, NoteAcl, InsertNoteAcl, NOTE_PERMISSIONS]
 
 # API routes - handler-based pattern (recommended)
 api:
@@ -63,6 +62,14 @@ api:
       methods: [POST, DELETE]
       handler: "@hit/feature-pack-notepad/server/api/share"
       description: "Generate or revoke share link"
+    - path: /api/notepad/[id]/acl
+      methods: [GET, POST]
+      handler: "@hit/feature-pack-notepad/server/api/acl"
+      description: "List ACLs (GET) or create ACL entry (POST) for a note"
+    - path: /api/notepad/[id]/acl/[aclId]
+      methods: [DELETE]
+      handler: "@hit/feature-pack-notepad/server/api/acl"
+      description: "Delete an ACL entry"
 
 # No module dependencies - runs on project's own database
 requires:

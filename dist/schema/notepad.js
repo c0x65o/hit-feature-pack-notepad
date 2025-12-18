@@ -11,7 +11,12 @@
  * @ui-detail sections: info(title, content), metadata(createdAt, updatedAt, userId)
  * @ui-edit fields: title(text, required), content(textarea)
  */
-import { pgTable, varchar, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, timestamp, boolean, uuid, jsonb, index, unique, pgEnum } from "drizzle-orm/pg-core";
+/**
+ * Principal Types for ACL
+ * Note: Uses same enum name as vault to avoid conflicts when schemas are merged
+ */
+export const notepadPrincipalTypeEnum = pgEnum("notepad_principal_type", ["user", "group", "role"]);
 /**
  * Notes table - stores user notes
  *
@@ -49,4 +54,36 @@ export const notes = pgTable("notepad_notes", {
     /** When the note was last updated */
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+/**
+ * Notes ACL Table
+ * Stores access control entries for notes (users, groups, roles)
+ */
+export const noteAcls = pgTable("notepad_acls", {
+    id: uuid("id").primaryKey().defaultRandom(),
+    noteId: uuid("note_id").notNull(), // ID of the note
+    principalType: notepadPrincipalTypeEnum("principal_type").notNull(), // user | group | role
+    principalId: varchar("principal_id", { length: 255 }).notNull(), // User email, group ID, or role name
+    // Permissions array: READ, WRITE, DELETE, MANAGE_ACL
+    permissions: jsonb("permissions").$type().notNull(),
+    createdBy: varchar("created_by", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+    noteIdx: index("notepad_acls_note_idx").on(table.noteId),
+    principalIdx: index("notepad_acls_principal_idx").on(table.principalType, table.principalId),
+    notePrincipalIdx: unique("notepad_acls_note_principal_unique").on(table.noteId, table.principalType, table.principalId), // One ACL entry per note+principal
+}));
+/**
+ * Permission Constants
+ * Simplified permissions for notes:
+ * - READ: Can view the note
+ * - WRITE: Can edit the note
+ * - DELETE: Can delete the note
+ * - MANAGE_ACL: Can manage access control lists (grant/revoke permissions)
+ */
+export const NOTE_PERMISSIONS = {
+    READ: "READ",
+    WRITE: "WRITE",
+    DELETE: "DELETE",
+    MANAGE_ACL: "MANAGE_ACL",
+};
 //# sourceMappingURL=notepad.js.map

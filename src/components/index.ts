@@ -5,5 +5,4 @@
  * The shell provides the actual component implementations via UiKitProvider.
  */
 
-// No custom components exported - using useUi() from @hit/ui-kit instead
-export {};
+export { NoteAclModal } from './NoteAclModal';
