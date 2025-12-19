@@ -1,9 +1,9 @@
 // src/server/api/notepad.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { notes } from '@/lib/feature-pack-schemas';
-import { eq, desc, asc, like, sql, and, or, isNull, type AnyColumn } from 'drizzle-orm';
-import { getUserId } from '../auth';
+import { notes, noteAcls } from '@/lib/feature-pack-schemas';
+import { eq, desc, asc, like, sql, and, or, isNull, inArray, type AnyColumn } from 'drizzle-orm';
+import { getUserId, extractUserFromRequest } from '../auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
     // Scope parameter (per_user or global)
     const scope = searchParams.get('scope') || 'per_user';
 
-    const userId = getUserId(request);
+    const user = extractUserFromRequest(request);
+    const userId = user?.sub || null;
     if (!userId && scope === 'per_user') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -40,9 +41,79 @@ export async function GET(request: NextRequest) {
     // Build where conditions
     const conditions = [];
     
-    // Per-user scope: filter by userId
+    // Per-user scope: filter by userId OR notes shared via ACL
     if (scope === 'per_user' && userId) {
-      conditions.push(eq(notes.userId, userId));
+      // Get user's principals for ACL checking
+      const userEmail = user?.email || '';
+      const userRoles = user?.roles || [];
+      
+      // Build list of principal IDs to check in ACLs
+      const principalIds: string[] = [userId];
+      if (userEmail) {
+        principalIds.push(userEmail);
+      }
+      principalIds.push(...userRoles);
+      
+      // Find note IDs that user has READ access to via ACL
+      let sharedNoteIds: string[] = [];
+      if (principalIds.length > 0) {
+        // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
+        const aclConditions = [];
+        
+        // User principal (check both userId and email)
+        if (userId) {
+          aclConditions.push(
+            and(
+              eq(noteAcls.principalType, 'user'),
+              eq(noteAcls.principalId, userId)
+            )
+          );
+        }
+        if (userEmail) {
+          aclConditions.push(
+            and(
+              eq(noteAcls.principalType, 'user'),
+              eq(noteAcls.principalId, userEmail)
+            )
+          );
+        }
+        
+        // Role principals
+        for (const role of userRoles) {
+          aclConditions.push(
+            and(
+              eq(noteAcls.principalType, 'role'),
+              eq(noteAcls.principalId, role)
+            )
+          );
+        }
+        
+        if (aclConditions.length > 0) {
+          const userAcls = await db
+            .select({ noteId: noteAcls.noteId })
+            .from(noteAcls)
+            .where(
+              and(
+                or(...aclConditions),
+                sql`${noteAcls.permissions}::jsonb @> '["READ"]'::jsonb`
+              )
+            );
+          
+          sharedNoteIds = [...new Set(userAcls.map((acl: { noteId: string }) => acl.noteId))] as string[];
+        }
+      }
+      
+      // Include notes owned by user OR notes shared via ACL
+      if (sharedNoteIds.length > 0) {
+        conditions.push(
+          or(
+            eq(notes.userId, userId),
+            inArray(notes.id, sharedNoteIds)
+          )!
+        );
+      } else {
+        conditions.push(eq(notes.userId, userId));
+      }
     }
     
     // Search in title and content

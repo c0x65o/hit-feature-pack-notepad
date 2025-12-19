@@ -4,8 +4,12 @@ import { useState } from 'react';
 import { Plus, Eye, Edit, Trash2, Share2, } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
 import { useNotes, useNoteMutations } from '../hooks/useNotepad';
-export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = false, allowDelete = true, }) {
+export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled: sharingEnabledProp, allowDelete = true, }) {
     const { Page, Card, Button, DataTable, Badge, EmptyState, Alert, Spinner } = useUi();
+    // Read sharing_enabled from config if not provided as prop
+    const win = typeof window !== 'undefined' ? window : null;
+    const configSharingEnabled = win?.__HIT_CONFIG?.featurePacks?.notepad?.sharing_enabled ?? false;
+    const sharingEnabled = sharingEnabledProp ?? configSharingEnabled;
     const [page, setPage] = useState(1);
     const { data, loading, error, refresh } = useNotes({
         page,
@@ -69,8 +73,8 @@ export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = f
                             ? [
                                 {
                                     key: 'isPublic',
-                                    label: 'Status',
-                                    render: (value) => value ? _jsx(Badge, { variant: "success", children: "Shared" }) : _jsx(Badge, { children: "Private" }),
+                                    label: 'Shared',
+                                    render: (value) => value ? (_jsx(Share2, { size: 16, className: "text-green-600 dark:text-green-400" })) : null,
                                 },
                             ]
                             : []),

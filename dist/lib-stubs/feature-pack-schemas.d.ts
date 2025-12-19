@@ -7,5 +7,5 @@
  *
  * This stub re-exports from the local schema file for type checking.
  */
-export { notes, type Note, type InsertNote, type UpdateNote, } from '../schema/notepad';
+export { notes, noteAcls, type Note, type InsertNote, type UpdateNote, type NoteAcl, type InsertNoteAcl, NOTE_PERMISSIONS, } from '../schema/notepad';
 //# sourceMappingURL=feature-pack-schemas.d.ts.map

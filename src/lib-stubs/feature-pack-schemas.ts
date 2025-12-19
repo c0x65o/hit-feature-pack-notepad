@@ -11,8 +11,12 @@
 // Re-export from the actual schema file for type checking during build
 export {
   notes,
+  noteAcls,
   type Note,
   type InsertNote,
   type UpdateNote,
+  type NoteAcl,
+  type InsertNoteAcl,
+  NOTE_PERMISSIONS,
 } from '../schema/notepad';
 

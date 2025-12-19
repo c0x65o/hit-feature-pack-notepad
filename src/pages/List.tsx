@@ -21,10 +21,15 @@ interface NoteListProps {
 export function NoteList({
   onNavigate,
   showTimestamps = true,
-  sharingEnabled = false,
+  sharingEnabled: sharingEnabledProp,
   allowDelete = true,
 }: NoteListProps) {
   const { Page, Card, Button, DataTable, Badge, EmptyState, Alert, Spinner } = useUi();
+  
+  // Read sharing_enabled from config if not provided as prop
+  const win = typeof window !== 'undefined' ? (window as any) : null;
+  const configSharingEnabled = win?.__HIT_CONFIG?.featurePacks?.notepad?.sharing_enabled ?? false;
+  const sharingEnabled = sharingEnabledProp ?? configSharingEnabled;
   
   const [page, setPage] = useState(1);
   
@@ -121,9 +126,11 @@ export function NoteList({
               ? [
                   {
                     key: 'isPublic',
-                    label: 'Status',
+                    label: 'Shared',
                     render: (value: unknown) =>
-                      value ? <Badge variant="success">Shared</Badge> : <Badge>Private</Badge>,
+                      value ? (
+                        <Share2 size={16} className="text-green-600 dark:text-green-400" />
+                      ) : null,
                   },
                 ]
               : []),

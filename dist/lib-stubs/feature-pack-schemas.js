@@ -8,5 +8,5 @@
  * This stub re-exports from the local schema file for type checking.
  */
 // Re-export from the actual schema file for type checking during build
-export { notes, } from '../schema/notepad';
+export { notes, noteAcls, NOTE_PERMISSIONS, } from '../schema/notepad';
 //# sourceMappingURL=feature-pack-schemas.js.map

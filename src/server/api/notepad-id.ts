@@ -1,9 +1,9 @@
 // src/server/api/notepad-id.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
-import { notes } from '@/lib/feature-pack-schemas';
-import { eq, and, or, isNull } from 'drizzle-orm';
-import { getUserId } from '../auth';
+import { notes, noteAcls } from '@/lib/feature-pack-schemas';
+import { eq, and, or, isNull, sql } from 'drizzle-orm';
+import { getUserId, extractUserFromRequest } from '../auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing id' }, { status: 400 });
     }
 
-    const userId = getUserId(request);
+    const user = extractUserFromRequest(request);
+    const userId = user?.sub || null;
 
     const [note] = await db
       .select()
@@ -39,7 +40,65 @@ export async function GET(request: NextRequest) {
     }
 
     // Check access: user owns note, or note is global (userId is null), or note is public
-    if (note.userId && note.userId !== userId && !note.isPublic) {
+    let hasAccess = false;
+    if (!note.userId || note.userId === userId) {
+      hasAccess = true;
+    } else if (note.isPublic) {
+      hasAccess = true;
+    } else if (userId) {
+      // Check if user has READ access via ACL
+      const userEmail = user?.email || '';
+      const userRoles = user?.roles || [];
+      
+      // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
+      const aclConditions = [];
+      
+      // User principal (check both userId and email)
+      if (userId) {
+        aclConditions.push(
+          and(
+            eq(noteAcls.principalType, 'user'),
+            eq(noteAcls.principalId, userId)
+          )
+        );
+      }
+      if (userEmail) {
+        aclConditions.push(
+          and(
+            eq(noteAcls.principalType, 'user'),
+            eq(noteAcls.principalId, userEmail)
+          )
+        );
+      }
+      
+      // Role principals
+      for (const role of userRoles) {
+        aclConditions.push(
+          and(
+            eq(noteAcls.principalType, 'role'),
+            eq(noteAcls.principalId, role)
+          )
+        );
+      }
+      
+      if (aclConditions.length > 0) {
+        const userAcls = await db
+          .select()
+          .from(noteAcls)
+          .where(
+            and(
+              eq(noteAcls.noteId, id),
+              or(...aclConditions),
+              sql`${noteAcls.permissions}::jsonb @> '["READ"]'::jsonb`
+            )
+          )
+          .limit(1);
+        
+        hasAccess = userAcls.length > 0;
+      }
+    }
+
+    if (!hasAccess) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
