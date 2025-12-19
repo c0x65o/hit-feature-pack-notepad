@@ -88,7 +88,7 @@ export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled = f
                         updatedAt: note.updatedAt,
                         createdAt: note.createdAt,
                         isPublic: note.isPublic,
-                    })) || [], emptyMessage: "No notes found", loading: loading, searchable: true, exportable: true, showColumnVisibility: true, pageSize: 25 }) })] }));
+                    })) || [], emptyMessage: "No notes found", loading: loading, searchable: true, exportable: true, showColumnVisibility: true, pageSize: 25, onRefresh: refresh, refreshing: loading, tableId: "notepad.notes" }) })] }));
 }
 export default NoteList;
 //# sourceMappingURL=List.js.map

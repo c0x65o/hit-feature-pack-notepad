@@ -173,6 +173,9 @@ export function NoteList({
           exportable
           showColumnVisibility
           pageSize={25}
+          onRefresh={refresh}
+          refreshing={loading}
+          tableId="notepad.notes"
         />
       </Card>
     </Page>
