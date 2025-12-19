@@ -13,9 +13,9 @@
  */
 /**
  * Principal Types for ACL
- * Note: Uses same enum name as vault to avoid conflicts when schemas are merged
+ * Shared enum used across all feature packs (forms, vault, notepad, etc.)
  */
-export declare const notepadPrincipalTypeEnum: import("drizzle-orm/pg-core").PgEnum<["user", "group", "role"]>;
+export declare const principalTypeEnum: import("drizzle-orm/pg-core").PgEnum<["user", "group", "role"]>;
 /**
  * Notes table - stores user notes
  *

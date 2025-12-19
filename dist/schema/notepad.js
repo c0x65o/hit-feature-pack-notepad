@@ -14,9 +14,9 @@
 import { pgTable, varchar, text, timestamp, boolean, uuid, jsonb, index, unique, pgEnum } from "drizzle-orm/pg-core";
 /**
  * Principal Types for ACL
- * Note: Uses same enum name as vault to avoid conflicts when schemas are merged
+ * Shared enum used across all feature packs (forms, vault, notepad, etc.)
  */
-export const notepadPrincipalTypeEnum = pgEnum("notepad_principal_type", ["user", "group", "role"]);
+export const principalTypeEnum = pgEnum("principal_type", ["user", "group", "role"]);
 /**
  * Notes table - stores user notes
  *
@@ -61,7 +61,7 @@ export const notes = pgTable("notepad_notes", {
 export const noteAcls = pgTable("notepad_acls", {
     id: uuid("id").primaryKey().defaultRandom(),
     noteId: uuid("note_id").notNull(), // ID of the note
-    principalType: notepadPrincipalTypeEnum("principal_type").notNull(), // user | group | role
+    principalType: principalTypeEnum("principal_type").notNull(), // user | group | role
     principalId: varchar("principal_id", { length: 255 }).notNull(), // User email, group ID, or role name
     // Permissions array: READ, WRITE, DELETE, MANAGE_ACL
     permissions: jsonb("permissions").$type().notNull(),
