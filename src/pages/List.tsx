@@ -97,7 +97,7 @@ export function NoteList({
               key: 'title',
               label: 'Title',
               sortable: true,
-              render: (_, row) => (
+              render: (_: unknown, row: Record<string, unknown>) => (
                 <button
                   onClick={() => navigate(`/notepad/${row.id}`)}
                   className="font-medium hover:text-blue-500 transition-colors text-left"
@@ -140,7 +140,7 @@ export function NoteList({
               align: 'right' as const,
               sortable: false,
               hideable: false,
-              render: (_, row) => (
+              render: (_: unknown, row: Record<string, unknown>) => (
                 <div className="flex items-center justify-end gap-2">
                   <Button variant="ghost" size="sm" onClick={() => navigate(`/notepad/${row.id}`)}>
                     <Eye size={16} />

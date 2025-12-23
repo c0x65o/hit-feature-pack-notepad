@@ -20,5 +20,5 @@ export { NoteList, NoteListPage, NoteDetail, NoteDetailPage, NoteEdit, NoteEditP
 export * from './components/index';
 export * from './hooks/index';
 export { navContributions as nav } from './nav';
-export { notes, type Note, type InsertNote, type UpdateNote } from './schema/notepad';
+export type { Note, InsertNote, UpdateNote } from './schema/notepad';
 //# sourceMappingURL=index.d.ts.map

@@ -36,5 +36,6 @@ export * from './hooks/index';
 // Navigation config
 export { navContributions as nav } from './nav';
 
-// Schema exports - for projects to import into their schema
-export { notes, type Note, type InsertNote, type UpdateNote } from './schema/notepad';
+// Schema exports - MOVED to @hit/feature-pack-notepad/schema to avoid bundling drizzle-orm in client
+// Only re-export types (no runtime drizzle dependency)
+export type { Note, InsertNote, UpdateNote } from './schema/notepad';

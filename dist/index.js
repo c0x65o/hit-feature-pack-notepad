@@ -24,6 +24,4 @@ export * from './components/index';
 export * from './hooks/index';
 // Navigation config
 export { navContributions as nav } from './nav';
-// Schema exports - for projects to import into their schema
-export { notes } from './schema/notepad';
 //# sourceMappingURL=index.js.map
