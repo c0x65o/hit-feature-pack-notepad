@@ -1,6 +1,6 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "1.0.46",
+  "version": "1.0.47",
   "description": "Notepad feature pack with CRUD, list view, sharing, and per-user/global scope. Uses @hit/ui-kit for shell-agnostic UI.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -41,6 +41,7 @@
     "react": "^18.0.0",
     "next": "^14.0.0",
     "@hit/sdk": "*",
+    "zod": ">=3.22.0",
     "lucide-react": ">=0.263.0",
     "drizzle-orm": ">=0.30.0"
   },
@@ -50,6 +51,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "drizzle-orm": "^0.30.0",
+    "zod": "^3.22.0",
     "lucide-react": "^0.460.0",
     "next": "^14.2.5",
     "typescript": "^5.0.0"
