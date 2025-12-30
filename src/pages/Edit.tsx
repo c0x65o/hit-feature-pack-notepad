@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, StickyNote, Users } from 'lucide-react';
-import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
+import { useUi, useFormSubmit, type BreadcrumbItem } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 import { NoteAclModal } from '../components/NoteAclModal';
 
@@ -21,11 +21,11 @@ export function NoteEdit({
   
   const isNew = !id || id === 'new';
   const { note, loading: loadingNote, error: loadError } = useNote(isNew ? undefined : id);
-  const { createNote, updateNote, loading: saving, error: saveError } = useNoteMutations();
+  const { createNote, updateNote } = useNoteMutations();
+  const { submitting, error, fieldErrors, submit, clearError, setFieldErrors, clearFieldError } = useFormSubmit<{ id: string }>();
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showAclModal, setShowAclModal] = useState(false);
 
   // Populate form when note loads
@@ -62,16 +62,19 @@ export function NoteEdit({
 
     if (!validateForm()) return;
 
-    try {
+    const result = await submit(async () => {
       if (isNew) {
         const newNote = await createNote({ title, content });
-        navigate(`/notepad/${newNote.id}`);
+        return { id: newNote.id };
       } else if (id) {
         await updateNote(id, { title, content });
-        navigate(`/notepad/${id}`);
+        return { id };
       }
-    } catch {
-      // Error handled by hook
+      throw new Error('Invalid state');
+    });
+
+    if (result) {
+      navigate(`/notepad/${result.id}`);
     }
   };
 
@@ -142,9 +145,9 @@ export function NoteEdit({
       }
     >
       {/* Save Error */}
-      {saveError && (
-        <Alert variant="error" title="Error saving note">
-          {saveError.message}
+      {error && (
+        <Alert variant="error" title="Error saving note" onClose={clearError}>
+          {error.message}
         </Alert>
       )}
 
@@ -153,7 +156,7 @@ export function NoteEdit({
           <Input
             label="Title"
             value={title}
-            onChange={setTitle}
+            onChange={(v) => { setTitle(v); clearFieldError('title'); }}
             placeholder="Enter note title..."
             required
             error={fieldErrors.title}
@@ -175,9 +178,9 @@ export function NoteEdit({
             <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" loading={saving}>
+            <Button type="submit" variant="primary" loading={submitting} disabled={submitting}>
               <Save size={16} className="mr-2" />
-              {isNew ? 'Create Note' : 'Save Changes'}
+              {submitting ? 'Saving...' : (isNew ? 'Create Note' : 'Save Changes')}
             </Button>
           </div>
         </form>
