@@ -2,8 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { notes, noteAcls } from '@/lib/feature-pack-schemas';
-import { eq, and, or, isNull, sql } from 'drizzle-orm';
+import { eq, and, or, isNull, sql, inArray } from 'drizzle-orm';
 import { getUserId, extractUserFromRequest } from '../auth';
+import { resolveUserPrincipals } from '@hit/acl-utils';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,8 +48,10 @@ export async function GET(request: NextRequest) {
       hasAccess = true;
     } else if (userId) {
       // Check if user has READ access via ACL
-      const userEmail = user?.email || '';
-      const userRoles = user?.roles || [];
+      const principals = await resolveUserPrincipals({ request, user: user as any });
+      const userEmail = principals.userEmail || '';
+      const userRoles = principals.roles || [];
+      const userGroups = principals.groupIds || [];
       
       // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
       const aclConditions = [];
@@ -77,6 +80,16 @@ export async function GET(request: NextRequest) {
           and(
             eq(noteAcls.principalType, 'role'),
             eq(noteAcls.principalId, role)
+          )
+        );
+      }
+
+      // Group principals (includes dynamic groups via auth /me/groups)
+      if (userGroups.length > 0) {
+        aclConditions.push(
+          and(
+            eq(noteAcls.principalType, 'group'),
+            inArray(noteAcls.principalId, userGroups)
           )
         );
       }

@@ -4,6 +4,7 @@ import { getDb } from '@/lib/db';
 import { notes, noteAcls } from '@/lib/feature-pack-schemas';
 import { eq, desc, asc, like, sql, and, or, inArray } from 'drizzle-orm';
 import { getUserId, extractUserFromRequest } from '../auth';
+import { resolveUserPrincipals } from '@hit/acl-utils';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 /**
@@ -34,18 +35,13 @@ export async function GET(request) {
         const conditions = [];
         // Per-user scope: filter by userId OR notes shared via ACL
         if (scope === 'per_user' && userId) {
-            // Get user's principals for ACL checking
-            const userEmail = user?.email || '';
-            const userRoles = user?.roles || [];
-            // Build list of principal IDs to check in ACLs
-            const principalIds = [userId];
-            if (userEmail) {
-                principalIds.push(userEmail);
-            }
-            principalIds.push(...userRoles);
+            const principals = await resolveUserPrincipals({ request, user: user });
+            const userEmail = principals.userEmail || '';
+            const userRoles = principals.roles || [];
+            const userGroups = principals.groupIds || [];
             // Find note IDs that user has READ access to via ACL
             let sharedNoteIds = [];
-            if (principalIds.length > 0) {
+            if (userId || userEmail || userRoles.length > 0 || userGroups.length > 0) {
                 // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
                 const aclConditions = [];
                 // User principal (check both userId and email)
@@ -58,6 +54,10 @@ export async function GET(request) {
                 // Role principals
                 for (const role of userRoles) {
                     aclConditions.push(and(eq(noteAcls.principalType, 'role'), eq(noteAcls.principalId, role)));
+                }
+                // Group principals (includes dynamic groups via auth /me/groups)
+                if (userGroups.length > 0) {
+                    aclConditions.push(and(eq(noteAcls.principalType, 'group'), inArray(noteAcls.principalId, userGroups)));
                 }
                 if (aclConditions.length > 0) {
                     const userAcls = await db

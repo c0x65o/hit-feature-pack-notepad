@@ -3,8 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 // @ts-ignore - noteAcls will be available when schema is imported by project
 import { noteAcls, notes } from '@/lib/feature-pack-schemas';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, or, inArray, sql } from 'drizzle-orm';
 import { extractUserFromRequest } from '../auth';
+import { resolveUserPrincipals } from '@hit/acl-utils';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,21 +48,43 @@ export async function GET(request: NextRequest) {
 
     // Check if user is the owner
     if (note.userId && note.userId !== user.sub) {
-      // Check if user has MANAGE_ACL via ACL entry
-      const userAcls = await db
-        .select()
-        .from(noteAcls)
-        .where(
-          and(
-            eq(noteAcls.noteId, noteId),
-            eq(noteAcls.principalType, 'user'),
-            eq(noteAcls.principalId, user.sub)
-          )
-        );
+      const principals = await resolveUserPrincipals({ request, user: user as any });
+      const userId = principals.userId;
+      const userEmail = principals.userEmail || '';
+      const roles = principals.roles || [];
+      const groupIds = principals.groupIds || [];
 
-      const hasManageAcl = userAcls.some(
-        (acl: { permissions: string[] }) => acl.permissions.includes('MANAGE_ACL')
-      );
+      const conds = [];
+      // user principal (id + email)
+      if (userId) {
+        conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userId)));
+      }
+      if (userEmail) {
+        conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userEmail)));
+      }
+      // role principals
+      for (const r of roles) {
+        conds.push(and(eq(noteAcls.principalType, 'role'), eq(noteAcls.principalId, r)));
+      }
+      // group principals
+      if (groupIds.length > 0) {
+        conds.push(and(eq(noteAcls.principalType, 'group'), inArray(noteAcls.principalId, groupIds)));
+      }
+
+      const userAcls = conds.length
+        ? await db
+            .select()
+            .from(noteAcls)
+            .where(
+              and(
+                eq(noteAcls.noteId, noteId),
+                or(...conds),
+                sql`${noteAcls.permissions}::jsonb @> '["MANAGE_ACL"]'::jsonb`
+              )
+            )
+        : [];
+
+      const hasManageAcl = userAcls.length > 0;
 
       if (!hasManageAcl) {
         return NextResponse.json(
@@ -134,21 +157,32 @@ export async function POST(request: NextRequest) {
 
     // Check if user has MANAGE_ACL permission
     if (note.userId && note.userId !== user.sub) {
-      // Check if user has MANAGE_ACL via ACL entry
-      const userAcls = await db
-        .select()
-        .from(noteAcls)
-        .where(
-          and(
-            eq(noteAcls.noteId, noteId),
-            eq(noteAcls.principalType, 'user'),
-            eq(noteAcls.principalId, user.sub)
-          )
-        );
+      const principals = await resolveUserPrincipals({ request, user: user as any });
+      const userId = principals.userId;
+      const userEmail = principals.userEmail || '';
+      const roles = principals.roles || [];
+      const groupIds = principals.groupIds || [];
 
-      const hasManageAcl = userAcls.some(
-        (acl: { permissions: string[] }) => acl.permissions.includes('MANAGE_ACL')
-      );
+      const conds = [];
+      if (userId) conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userId)));
+      if (userEmail) conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userEmail)));
+      for (const r of roles) conds.push(and(eq(noteAcls.principalType, 'role'), eq(noteAcls.principalId, r)));
+      if (groupIds.length > 0) conds.push(and(eq(noteAcls.principalType, 'group'), inArray(noteAcls.principalId, groupIds)));
+
+      const userAcls = conds.length
+        ? await db
+            .select()
+            .from(noteAcls)
+            .where(
+              and(
+                eq(noteAcls.noteId, noteId),
+                or(...conds),
+                sql`${noteAcls.permissions}::jsonb @> '["MANAGE_ACL"]'::jsonb`
+              )
+            )
+        : [];
+
+      const hasManageAcl = userAcls.length > 0;
 
       if (!hasManageAcl) {
         return NextResponse.json(
@@ -240,21 +274,32 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (note.userId && note.userId !== user.sub) {
-      // Check if user has MANAGE_ACL via ACL entry
-      const userAcls = await db
-        .select()
-        .from(noteAcls)
-        .where(
-          and(
-            eq(noteAcls.noteId, noteId),
-            eq(noteAcls.principalType, 'user'),
-            eq(noteAcls.principalId, user.sub)
-          )
-        );
+      const principals = await resolveUserPrincipals({ request, user: user as any });
+      const userId = principals.userId;
+      const userEmail = principals.userEmail || '';
+      const roles = principals.roles || [];
+      const groupIds = principals.groupIds || [];
 
-      const hasManageAcl = userAcls.some(
-        (acl: { permissions: string[] }) => acl.permissions.includes('MANAGE_ACL')
-      );
+      const conds = [];
+      if (userId) conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userId)));
+      if (userEmail) conds.push(and(eq(noteAcls.principalType, 'user'), eq(noteAcls.principalId, userEmail)));
+      for (const r of roles) conds.push(and(eq(noteAcls.principalType, 'role'), eq(noteAcls.principalId, r)));
+      if (groupIds.length > 0) conds.push(and(eq(noteAcls.principalType, 'group'), inArray(noteAcls.principalId, groupIds)));
+
+      const userAcls = conds.length
+        ? await db
+            .select()
+            .from(noteAcls)
+            .where(
+              and(
+                eq(noteAcls.noteId, noteId),
+                or(...conds),
+                sql`${noteAcls.permissions}::jsonb @> '["MANAGE_ACL"]'::jsonb`
+              )
+            )
+        : [];
+
+      const hasManageAcl = userAcls.length > 0;
 
       if (!hasManageAcl) {
         return NextResponse.json(
