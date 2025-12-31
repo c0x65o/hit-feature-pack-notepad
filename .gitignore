@@ -13,3 +13,4 @@ build/
 .next/
 out/
 *.tsbuildinfo
+.hit/generated/
