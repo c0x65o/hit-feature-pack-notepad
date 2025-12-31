@@ -156,7 +156,7 @@ export function NoteEdit({
           <Input
             label="Title"
             value={title}
-            onChange={(v) => { setTitle(v); clearFieldError('title'); }}
+            onChange={(v: string) => { setTitle(v); clearFieldError('title'); }}
             placeholder="Enter note title..."
             required
             error={fieldErrors.title}
