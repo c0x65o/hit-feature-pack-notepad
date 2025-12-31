@@ -9,3 +9,7 @@ __pycache__/
 *.egg-info/
 .hit/generated/.manifest_hash
 .hit_deps_snapshot.json
+build/
+.next/
+out/
+*.tsbuildinfo
