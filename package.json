@@ -1,6 +1,6 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "1.0.58",
+  "version": "1.0.59",
   "description": "Notepad feature pack with CRUD, list view, sharing, and per-user/global scope. Uses @hit/ui-kit for shell-agnostic UI.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -33,6 +33,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {},
