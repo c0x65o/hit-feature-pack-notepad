@@ -78,7 +78,7 @@ export function NoteList({
       actions={
         <Button variant="primary" onClick={() => navigate('/notepad/new')}>
           <Plus size={16} className="mr-2" />
-          New Note
+          New Note1
         </Button>
       }
     >
