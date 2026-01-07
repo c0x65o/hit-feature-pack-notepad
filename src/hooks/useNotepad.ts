@@ -19,10 +19,12 @@ export interface Note {
 
 interface PaginatedResponse<T> {
   items: T[];
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface UseQueryOptions {
@@ -77,11 +79,11 @@ export function useNotes(options: UseQueryOptions = {}) {
       setLoading(true);
       const params = new URLSearchParams({
         page: String(page),
-        page_size: String(pageSize),
+        pageSize: String(pageSize),
       });
       if (search) params.set('search', search);
-      if (sortBy) params.set('sort_by', sortBy);
-      if (sortOrder) params.set('sort_order', sortOrder);
+      if (sortBy) params.set('sortBy', sortBy);
+      if (sortOrder) params.set('sortOrder', sortOrder);
 
       const result = await fetchApi<PaginatedResponse<Note>>(`?${params}`);
       setData(result);

@@ -9,6 +9,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
+import { useServerDataTableState } from '@hit/ui-kit';
 import { useNotes, useNoteMutations } from '../hooks/useNotepad';
 
 interface NoteListProps {
@@ -31,13 +32,19 @@ export function NoteList({
   const configSharingEnabled = win?.__HIT_CONFIG?.featurePacks?.notepad?.sharing_enabled ?? false;
   const sharingEnabled = sharingEnabledProp ?? configSharingEnabled;
   
-  const [page, setPage] = useState(1);
-  
-  const { data, loading, error, refresh } = useNotes({
-    page,
+  const serverTable = useServerDataTableState({
+    tableId: 'notepad.notes',
     pageSize: 25,
-    sortBy: 'updatedAt',
-    sortOrder: 'desc',
+    initialSort: { sortBy: 'updatedAt', sortOrder: 'desc' },
+    sortWhitelist: ['title', 'createdAt', 'updatedAt'],
+  });
+
+  const { data, loading, error, refresh } = useNotes({
+    page: serverTable.query.page,
+    pageSize: serverTable.query.pageSize,
+    search: serverTable.query.search,
+    sortBy: serverTable.query.sortBy,
+    sortOrder: serverTable.query.sortOrder,
   });
   
   const { deleteNote, loading: mutating } = useNoteMutations();
@@ -179,7 +186,9 @@ export function NoteList({
           searchable
           exportable
           showColumnVisibility
-          pageSize={25}
+          total={data?.pagination?.total}
+          {...serverTable.dataTable}
+          searchDebounceMs={400}
           onRefresh={refresh}
           refreshing={loading}
           tableId="notepad.notes"
