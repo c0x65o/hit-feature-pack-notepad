@@ -5,7 +5,7 @@ import { getDb } from '@/lib/db';
 import { noteAcls, notes } from '@/lib/feature-pack-schemas';
 import { eq, and, desc, or, inArray, sql } from 'drizzle-orm';
 import { extractUserFromRequest } from '../auth';
-import { resolveUserPrincipals } from '@hit/acl-utils';
+import { resolveUserPrincipals } from '@/lib/acl-utils';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
