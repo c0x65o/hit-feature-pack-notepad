@@ -78,7 +78,7 @@ requires:
 # Dependencies on other feature packs
 dependencies:
   feature_packs:
-    - name: dashboard-shell
+    - name: erp-shell-core
 
 # Configurable options
 config:
