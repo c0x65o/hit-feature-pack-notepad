@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useUi } from '@hit/ui-kit';
 import { AclPicker, type AclPickerConfig, type AclEntry } from '@hit/ui-kit';
-import { usePrincipals } from '@hit/feature-pack-auth-core';
+import { createFetchPrincipals } from '@hit/feature-pack-auth-core';
 import type { NoteAcl } from '../schema/notepad';
 import { NOTE_PERMISSIONS } from '../schema/notepad';
 
@@ -52,6 +52,8 @@ export function NoteAclModal({ noteId, isOpen, onClose, onUpdate }: NoteAclModal
       permissions: Array.isArray(acl.permissions) ? acl.permissions : [],
     }));
   }, [acls]);
+
+  const fetchPrincipals = useMemo(() => createFetchPrincipals({ isAdmin: true }), []);
 
   async function handleAdd(entry: Omit<AclEntry, 'id'>) {
     try {
@@ -161,6 +163,7 @@ export function NoteAclModal({ noteId, isOpen, onClose, onUpdate }: NoteAclModal
           error={error?.message || null}
           onAdd={handleAdd}
           onRemove={handleRemove}
+          fetchPrincipals={fetchPrincipals}
         />
       </div>
     </Modal>
