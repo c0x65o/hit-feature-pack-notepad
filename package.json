@@ -1,42 +1,48 @@
 {
   "name": "@hit/feature-pack-notepad",
-  "version": "1.0.71",
+  "version": "1.0.72",
   "description": "A HIT feature pack",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
+      "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.js",
       "default": "./dist/index.js"
     },
     "./pages/*": {
+      "development": "./src/pages/*.tsx",
       "types": "./dist/pages/*.d.ts",
       "import": "./dist/pages/*.js",
       "require": "./dist/pages/*.js",
       "default": "./dist/pages/*.js"
     },
     "./components/*": {
+      "development": "./src/components/*.ts",
       "types": "./dist/components/*.d.ts",
       "import": "./dist/components/*.js",
       "require": "./dist/components/*.js",
       "default": "./dist/components/*.js"
     },
     "./hooks/*": {
+      "development": "./src/hooks/*.ts",
       "types": "./dist/hooks/*.d.ts",
       "import": "./dist/hooks/*.js",
       "require": "./dist/hooks/*.js",
       "default": "./dist/hooks/*.js"
     },
     "./schema": {
+      "development": "./src/schema/notepad.ts",
       "types": "./dist/schema/notepad.d.ts",
       "import": "./dist/schema/notepad.js",
       "require": "./dist/schema/notepad.js",
       "default": "./dist/schema/notepad.js"
     },
     "./server/api/*": {
+      "development": "./src/server/api/*.ts",
       "types": "./dist/server/api/*.d.ts",
       "import": "./dist/server/api/*.js",
       "require": "./dist/server/api/*.js",
@@ -75,5 +81,6 @@
     "typescript": "^5",
     "zod": "^4.3.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "sideEffects": false
 }

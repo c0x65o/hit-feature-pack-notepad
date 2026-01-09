@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Save, StickyNote, Users } from 'lucide-react';
-import { useUi, useFormSubmit, type BreadcrumbItem } from '@hit/ui-kit';
+import type { BreadcrumbItem } from '@hit/ui-kit';
+import { useUi } from '@hit/ui-kit';
+import { useFormSubmit } from '@hit/ui-kit/hooks/useFormSubmit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 import { NoteAclModal } from '../components/NoteAclModal';
 

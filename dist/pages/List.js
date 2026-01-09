@@ -2,7 +2,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { Plus, Eye, Edit, Trash2, Share2, } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
-import { useServerDataTableState } from '@hit/ui-kit';
+import { useServerDataTableState } from '@hit/ui-kit/hooks/useServerDataTableState';
 import { useNotes, useNoteMutations } from '../hooks/useNotepad';
 export function NoteList({ onNavigate, showTimestamps = true, sharingEnabled: sharingEnabledProp, allowDelete = true, }) {
     const { Page, Card, Button, DataTable, Badge, EmptyState, Alert, Spinner } = useUi();

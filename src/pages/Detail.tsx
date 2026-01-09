@@ -10,7 +10,8 @@ import {
   Check,
   StickyNote,
 } from 'lucide-react';
-import { useUi, type BreadcrumbItem } from '@hit/ui-kit';
+import type { BreadcrumbItem } from '@hit/ui-kit';
+import { useUi } from '@hit/ui-kit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 import { NoteAclModal } from '../components/NoteAclModal';
 import { Users } from 'lucide-react';

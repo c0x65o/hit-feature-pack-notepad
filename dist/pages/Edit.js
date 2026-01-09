@@ -2,7 +2,8 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, StickyNote, Users } from 'lucide-react';
-import { useUi, useFormSubmit } from '@hit/ui-kit';
+import { useUi } from '@hit/ui-kit';
+import { useFormSubmit } from '@hit/ui-kit/hooks/useFormSubmit';
 import { useNote, useNoteMutations } from '../hooks/useNotepad';
 import { NoteAclModal } from '../components/NoteAclModal';
 export function NoteEdit({ id, onNavigate, allowRichText = false, }) {

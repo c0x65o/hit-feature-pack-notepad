@@ -9,7 +9,7 @@ import {
   Share2,
 } from 'lucide-react';
 import { useUi } from '@hit/ui-kit';
-import { useServerDataTableState } from '@hit/ui-kit';
+import { useServerDataTableState } from '@hit/ui-kit/hooks/useServerDataTableState';
 import { useNotes, useNoteMutations } from '../hooks/useNotepad';
 
 interface NoteListProps {
