@@ -18,20 +18,16 @@
  */
 
 // Pages - exported individually for tree-shaking
-export {
-  NoteList,
-  NoteListPage,
-  NoteDetail,
-  NoteDetailPage,
-  NoteEdit,
-  NoteEditPage,
-} from './pages/index';
+export { NoteList, default as NoteListPage } from './pages/List';
+export { NoteDetail, default as NoteDetailPage } from './pages/Detail';
+export { NoteEdit, default as NoteEditPage } from './pages/Edit';
 
 // Components - exported individually for tree-shaking
-export * from './components/index';
+export { NoteAclModal } from './components/NoteAclModal';
 
 // Hooks - exported individually for tree-shaking
-export * from './hooks/index';
+export { useNotes, useNote, useNoteMutations } from './hooks/useNotepad';
+export type { PaginatedResponse, UseQueryOptions } from './hooks/useNotepad';
 
 // Navigation config
 export { navContributions as nav } from './nav';

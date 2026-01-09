@@ -16,9 +16,12 @@
  * <Route path="/notepad/:id/edit" element={<NoteEdit id={params.id} />} />
  * ```
  */
-export { NoteList, NoteListPage, NoteDetail, NoteDetailPage, NoteEdit, NoteEditPage, } from './pages/index';
-export * from './components/index';
-export * from './hooks/index';
+export { NoteList, default as NoteListPage } from './pages/List';
+export { NoteDetail, default as NoteDetailPage } from './pages/Detail';
+export { NoteEdit, default as NoteEditPage } from './pages/Edit';
+export { NoteAclModal } from './components/NoteAclModal';
+export { useNotes, useNote, useNoteMutations } from './hooks/useNotepad';
+export type { PaginatedResponse, UseQueryOptions } from './hooks/useNotepad';
 export { navContributions as nav } from './nav';
 export type { Note, InsertNote, UpdateNote } from './schema/notepad';
 //# sourceMappingURL=index.d.ts.map
