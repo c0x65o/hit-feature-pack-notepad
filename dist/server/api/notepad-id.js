@@ -5,6 +5,7 @@ import { notes, noteAcls } from '@/lib/feature-pack-schemas';
 import { eq, and, or, sql, inArray } from 'drizzle-orm';
 import { getUserId, extractUserFromRequest } from '../auth';
 import { resolveUserPrincipals } from '@hit/feature-pack-auth-core/server/lib/acl-utils';
+import { resolveNotepadScopeMode } from '../lib/scope-mode';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 function extractId(request) {
@@ -33,21 +34,32 @@ export async function GET(request) {
         if (!note) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
-        // Check access: user owns note, or note is global (userId is null), or note is public
-        let hasAccess = false;
-        if (!note.userId || note.userId === userId) {
-            hasAccess = true;
+        // Check read permission and resolve scope mode
+        const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'read' });
+        // Explicit branching on none/own/ldd/any
+        if (mode === 'none') {
+            return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
-        else if (note.isPublic) {
-            hasAccess = true;
+        else if (mode === 'own') {
+            // Only allow if user owns the note
+            if (!userId || note.userId !== userId) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 });
+            }
         }
-        else if (userId) {
+        else if (mode === 'ldd') {
+            // Notes don't have LDD fields, so ldd mode is same as any (allow all)
+            // But still check ACLs below
+        }
+        else if (mode === 'any') {
+            // Allow all, but still check ACLs below
+        }
+        // Also check ACLs for shared notes
+        if (userId) {
             // Check if user has READ access via ACL
             const principals = await resolveUserPrincipals({ request, user: user });
             const userEmail = principals.userEmail || '';
             const userRoles = principals.roles || [];
             const userGroups = principals.groupIds || [];
-            // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
             const aclConditions = [];
             // User principal (check both userId and email)
             if (userId) {
@@ -60,7 +72,7 @@ export async function GET(request) {
             for (const role of userRoles) {
                 aclConditions.push(and(eq(noteAcls.principalType, 'role'), eq(noteAcls.principalId, role)));
             }
-            // Group principals (includes dynamic groups via auth /me/groups)
+            // Group principals
             if (userGroups.length > 0) {
                 aclConditions.push(and(eq(noteAcls.principalType, 'group'), inArray(noteAcls.principalId, userGroups)));
             }
@@ -70,11 +82,27 @@ export async function GET(request) {
                     .from(noteAcls)
                     .where(and(eq(noteAcls.noteId, id), or(...aclConditions), sql `${noteAcls.permissions}::jsonb @> '["READ"]'::jsonb`))
                     .limit(1);
-                hasAccess = userAcls.length > 0;
+                // If user has ACL access, allow it (for 'ldd' and 'any' modes)
+                if (userAcls.length > 0) {
+                    return NextResponse.json(note);
+                }
             }
         }
-        if (!hasAccess) {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        // For 'own' mode, we already checked ownership above, so return the note
+        // For 'ldd' and 'any' modes, if no ACL match, still allow if we got here (global notes or public)
+        if (mode === 'own') {
+            return NextResponse.json(note);
+        }
+        else if (mode === 'ldd' || mode === 'any') {
+            // Allow access for global notes (userId is null) or public notes
+            if (!note.userId || note.isPublic) {
+                return NextResponse.json(note);
+            }
+            // Otherwise, if user doesn't own it and no ACL match, deny
+            if (userId && note.userId !== userId) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 });
+            }
+            return NextResponse.json(note);
         }
         return NextResponse.json(note);
     }
@@ -104,9 +132,24 @@ export async function PUT(request) {
         if (!existing) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
-        // Check ownership: user owns note, or note is global
-        if (existing.userId && existing.userId !== userId) {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        // Check write permission and resolve scope mode
+        const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'write' });
+        // Explicit branching on none/own/ldd/any
+        if (mode === 'none') {
+            return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+        }
+        else if (mode === 'own') {
+            // Only allow if user owns the note
+            if (!userId || existing.userId !== userId) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 });
+            }
+        }
+        else if (mode === 'ldd') {
+            // Notes don't have LDD fields, so ldd mode is same as any (allow all)
+            // No additional check needed
+        }
+        else if (mode === 'any') {
+            // Allow all, no check needed
         }
         // Build update data
         const updateData = {
@@ -148,9 +191,24 @@ export async function DELETE(request) {
         if (!existing) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
         }
-        // Check ownership: user owns note, or note is global
-        if (existing.userId && existing.userId !== userId) {
-            return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        // Check delete permission and resolve scope mode
+        const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'delete' });
+        // Explicit branching on none/own/ldd/any
+        if (mode === 'none') {
+            return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+        }
+        else if (mode === 'own') {
+            // Only allow if user owns the note
+            if (!userId || existing.userId !== userId) {
+                return NextResponse.json({ error: 'Not found' }, { status: 404 });
+            }
+        }
+        else if (mode === 'ldd') {
+            // Notes don't have LDD fields, so ldd mode is same as any (allow all)
+            // No additional check needed
+        }
+        else if (mode === 'any') {
+            // Allow all, no check needed
         }
         await db.delete(notes).where(eq(notes.id, id));
         return NextResponse.json({ success: true });

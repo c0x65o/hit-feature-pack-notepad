@@ -2,21 +2,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 import { notes, noteAcls } from '@/lib/feature-pack-schemas';
-import { eq, desc, asc, like, sql, and, or, isNull, inArray, type AnyColumn } from 'drizzle-orm';
+import { eq, desc, asc, like, sql, and, or, inArray, type AnyColumn } from 'drizzle-orm';
 import { getUserId, extractUserFromRequest } from '../auth';
 import { resolveUserPrincipals } from '@hit/feature-pack-auth-core/server/lib/acl-utils';
+import { resolveNotepadScopeMode } from '../lib/scope-mode';
+import { requireNotepadAction } from '../lib/require-action';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 /**
  * GET /api/notepad
- * List notes (with per-user or global scope based on config)
+ * List notes (with scope-based filtering)
  */
 export async function GET(request: NextRequest) {
   try {
     const db = getDb();
     const { searchParams } = new URL(request.url);
+    const user = extractUserFromRequest(request);
+    const userId = user?.sub || null;
+
+    // Check read permission and resolve scope mode
+    const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'read' });
+
+    if (mode === 'none') {
+      // Explicit deny: return empty results (fail-closed but non-breaking for list UI)
+      return NextResponse.json({
+        items: [],
+        pagination: {
+          page: 1,
+          pageSize: 0,
+          total: 0,
+          totalPages: 0,
+        },
+      });
+    }
 
     // Pagination
     const page = parseInt(searchParams.get('page') || '1', 10);
@@ -30,31 +50,45 @@ export async function GET(request: NextRequest) {
     // Search
     const search = searchParams.get('search') || '';
 
-    // Scope parameter (per_user or global)
-    const scope = searchParams.get('scope') || 'per_user';
-
-    const user = extractUserFromRequest(request);
-    const userId = user?.sub || null;
-    if (!userId && scope === 'per_user') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     // Build where conditions
-    const conditions = [];
-    
-    // Per-user scope: filter by userId OR notes shared via ACL
-    if (scope === 'per_user' && userId) {
+    const conditions: any[] = [];
+
+    // Apply scope-based filtering (explicit branching on none/own/ldd/any)
+    if (mode === 'own') {
+      // Only show notes owned by the current user
+      if (!userId) {
+        // No user ID means no access in 'own' mode
+        return NextResponse.json({
+          items: [],
+          pagination: {
+            page: 1,
+            pageSize: 0,
+            total: 0,
+            totalPages: 0,
+          },
+        });
+      }
+      conditions.push(eq(notes.userId, userId));
+    } else if (mode === 'ldd') {
+      // Notes don't have LDD fields, so ldd mode is same as any (allow all)
+      // No filtering needed
+    } else if (mode === 'any') {
+      // Allow all notes, no filtering needed
+    }
+    // mode === 'none' already handled above
+
+    // Also include notes shared via ACL
+    if (userId) {
       const principals = await resolveUserPrincipals({ request, user: user as any });
       const userEmail = principals.userEmail || '';
       const userRoles = principals.roles || [];
       const userGroups = principals.groupIds || [];
-      
+
       // Find note IDs that user has READ access to via ACL
       let sharedNoteIds: string[] = [];
       if (userId || userEmail || userRoles.length > 0 || userGroups.length > 0) {
-        // Build ACL conditions: check user ID/email with principalType='user', roles with principalType='role'
         const aclConditions = [];
-        
+
         // User principal (check both userId and email)
         if (userId) {
           aclConditions.push(
@@ -72,7 +106,7 @@ export async function GET(request: NextRequest) {
             )
           );
         }
-        
+
         // Role principals
         for (const role of userRoles) {
           aclConditions.push(
@@ -83,7 +117,7 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        // Group principals (includes dynamic groups via auth /me/groups)
+        // Group principals
         if (userGroups.length > 0) {
           aclConditions.push(
             and(
@@ -92,7 +126,7 @@ export async function GET(request: NextRequest) {
             )
           );
         }
-        
+
         if (aclConditions.length > 0) {
           const userAcls = await db
             .select({ noteId: noteAcls.noteId })
@@ -103,24 +137,40 @@ export async function GET(request: NextRequest) {
                 sql`${noteAcls.permissions}::jsonb @> '["READ"]'::jsonb`
               )
             );
-          
+
           sharedNoteIds = [...new Set(userAcls.map((acl: { noteId: string }) => acl.noteId))] as string[];
         }
       }
-      
-      // Include notes owned by user OR notes shared via ACL
+
+      // If we have shared note IDs, include them in the query
       if (sharedNoteIds.length > 0) {
-        conditions.push(
-          or(
-            eq(notes.userId, userId),
-            inArray(notes.id, sharedNoteIds)
-          )!
-        );
-      } else {
-        conditions.push(eq(notes.userId, userId));
+        if (mode === 'own') {
+          // For 'own' mode, include own notes OR shared notes
+          conditions.push(
+            or(
+              eq(notes.userId, userId),
+              inArray(notes.id, sharedNoteIds)
+            )!
+          );
+        } else {
+          // For 'ldd' or 'any', include shared notes (already allowing all, but ACLs add more)
+          // This is a bit redundant but keeps ACL support consistent
+          if (conditions.length === 0) {
+            conditions.push(inArray(notes.id, sharedNoteIds));
+          } else {
+            // Merge with existing conditions
+            const existingCondition = conditions.pop();
+            conditions.push(
+              or(
+                existingCondition,
+                inArray(notes.id, sharedNoteIds)
+              )!
+            );
+          }
+        }
       }
     }
-    
+
     // Search in title and content
     if (search) {
       conditions.push(
@@ -181,6 +231,16 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check create permission
+    const createCheck = await requireNotepadAction(request, 'notepad.notes.create');
+    if (createCheck) return createCheck;
+
+    // Check write permission
+    const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'write' });
+    if (mode === 'none') {
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
+    }
+
     const db = getDb();
     const body = await request.json();
 
