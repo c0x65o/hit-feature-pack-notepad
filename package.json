@@ -60,7 +60,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@hit/feature-pack-auth-core": "*"
+    "@hit/feature-pack-auth-core": "file:../core/hit-feature-pack-auth-core"
   },
   "peerDependencies": {
     "@hit/feature-pack-auth-core": "*",
