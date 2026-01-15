@@ -26,16 +26,8 @@ export async function GET(request: NextRequest) {
     const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'read' });
 
     if (mode === 'none') {
-      // Explicit deny: return empty results (fail-closed but non-breaking for list UI)
-      return NextResponse.json({
-        items: [],
-        pagination: {
-          page: 1,
-          pageSize: 0,
-          total: 0,
-          totalPages: 0,
-        },
-      });
+      // Explicit deny: return 403 so UI can show a real error (not a misleading empty list).
+      return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     }
 
     // Pagination
@@ -53,31 +45,17 @@ export async function GET(request: NextRequest) {
     // Build where conditions
     const conditions: any[] = [];
 
-    // Apply scope-based filtering (explicit branching on none/own/ldd/any)
-    if (mode === 'own') {
-      // Only show notes owned by the current user
+    // Apply scope-based filtering (explicit branching on none/own/all)
+    const mustBeOwn = mode === 'own';
+    if (mustBeOwn) {
+      // Own-mode requires a user id.
       if (!userId) {
-        // No user ID means no access in 'own' mode
-        return NextResponse.json({
-          items: [],
-          pagination: {
-            page: 1,
-            pageSize: 0,
-            total: 0,
-            totalPages: 0,
-          },
-        });
+        return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
       }
-      conditions.push(eq(notes.userId, userId));
-    } else if (mode === 'ldd') {
-      // Notes don't have LDD fields, so ldd mode is same as any (allow all)
-      // No filtering needed
-    } else if (mode === 'any') {
-      // Allow all notes, no filtering needed
     }
-    // mode === 'none' already handled above
 
-    // Also include notes shared via ACL
+    // Also include notes shared via ACL (so "own" still shows shared notes).
+    let sharedNoteIds: string[] = [];
     if (userId) {
       const principals = await resolveUserPrincipals({ request, user: user as any });
       const userEmail = principals.userEmail || '';
@@ -85,7 +63,6 @@ export async function GET(request: NextRequest) {
       const userGroups = principals.groupIds || [];
 
       // Find note IDs that user has READ access to via ACL
-      let sharedNoteIds: string[] = [];
       if (userId || userEmail || userRoles.length > 0 || userGroups.length > 0) {
         const aclConditions = [];
 
@@ -141,34 +118,15 @@ export async function GET(request: NextRequest) {
           sharedNoteIds = [...new Set(userAcls.map((acl: { noteId: string }) => acl.noteId))] as string[];
         }
       }
+    }
 
-      // If we have shared note IDs, include them in the query
-      if (sharedNoteIds.length > 0) {
-        if (mode === 'own') {
-          // For 'own' mode, include own notes OR shared notes
-          conditions.push(
-            or(
-              eq(notes.userId, userId),
-              inArray(notes.id, sharedNoteIds)
-            )!
-          );
-        } else {
-          // For 'ldd' or 'any', include shared notes (already allowing all, but ACLs add more)
-          // This is a bit redundant but keeps ACL support consistent
-          if (conditions.length === 0) {
-            conditions.push(inArray(notes.id, sharedNoteIds));
-          } else {
-            // Merge with existing conditions
-            const existingCondition = conditions.pop();
-            conditions.push(
-              or(
-                existingCondition,
-                inArray(notes.id, sharedNoteIds)
-              )!
-            );
-          }
-        }
-      }
+    if (mustBeOwn) {
+      // For own-mode: (owned OR shared) when ACLs exist; otherwise owned-only.
+      conditions.push(
+        sharedNoteIds.length > 0
+          ? or(eq(notes.userId, userId!), inArray(notes.id, sharedNoteIds))!
+          : eq(notes.userId, userId!)
+      );
     }
 
     // Search in title and content

@@ -1,16 +1,14 @@
-import type { NextRequest } from 'next/server';
-export type ScopeMode = 'none' | 'own' | 'ldd' | 'any';
+export type ScopeMode = 'none' | 'own' | 'all';
 export type ScopeVerb = 'read' | 'write' | 'delete';
 export type ScopeEntity = 'notes';
 /**
  * Resolve effective scope mode using a tree:
  * - entity override: notepad.{entity}.{verb}.scope.{mode}
- * - notepad default: notepad.{verb}.scope.{mode}
- * - fallback: own
+ * - fallback: (admin -> all) (user -> own)
  *
  * Precedence if multiple are granted: most restrictive wins.
  */
-export declare function resolveNotepadScopeMode(request: NextRequest, args: {
+export declare function resolveNotepadScopeMode(request: Request, args: {
     entity?: ScopeEntity;
     verb: ScopeVerb;
 }): Promise<ScopeMode>;

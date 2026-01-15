@@ -44,19 +44,9 @@ export async function GET(request: NextRequest) {
     // Check read permission and resolve scope mode
     const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'read' });
 
-    // Explicit branching on none/own/ldd/any
+    // Explicit branching on none/own/all
     if (mode === 'none') {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    } else if (mode === 'own') {
-      // Only allow if user owns the note
-      if (!userId || note.userId !== userId) {
-        return NextResponse.json({ error: 'Not found' }, { status: 404 });
-      }
-    } else if (mode === 'ldd') {
-      // Notes don't have LDD fields, so ldd mode is same as any (allow all)
-      // But still check ACLs below
-    } else if (mode === 'any') {
-      // Allow all, but still check ACLs below
     }
 
     // Also check ACLs for shared notes
@@ -120,29 +110,27 @@ export async function GET(request: NextRequest) {
           )
           .limit(1);
 
-        // If user has ACL access, allow it (for 'ldd' and 'any' modes)
+        // If user has ACL access, allow it (even in own-mode).
         if (userAcls.length > 0) {
           return NextResponse.json(note);
         }
       }
     }
 
-    // For 'own' mode, we already checked ownership above, so return the note
-    // For 'ldd' and 'any' modes, if no ACL match, still allow if we got here (global notes or public)
-    if (mode === 'own') {
+    // Allow access for global notes (userId is null) or public notes
+    if (!note.userId || note.isPublic) {
       return NextResponse.json(note);
-    } else if (mode === 'ldd' || mode === 'any') {
-      // Allow access for global notes (userId is null) or public notes
-      if (!note.userId || note.isPublic) {
-        return NextResponse.json(note);
-      }
-      // Otherwise, if user doesn't own it and no ACL match, deny
-      if (userId && note.userId !== userId) {
+    }
+
+    if (mode === 'own') {
+      // Only allow if user owns the note (ACL already checked above).
+      if (!userId || note.userId !== userId) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
       }
       return NextResponse.json(note);
     }
 
+    // mode === 'all'
     return NextResponse.json(note);
   } catch (error) {
     console.error('[notepad] Get note error:', error);
@@ -181,7 +169,7 @@ export async function PUT(request: NextRequest) {
     // Check write permission and resolve scope mode
     const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'write' });
 
-    // Explicit branching on none/own/ldd/any
+    // Explicit branching on none/own/all
     if (mode === 'none') {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     } else if (mode === 'own') {
@@ -189,11 +177,6 @@ export async function PUT(request: NextRequest) {
       if (!userId || existing.userId !== userId) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
       }
-    } else if (mode === 'ldd') {
-      // Notes don't have LDD fields, so ldd mode is same as any (allow all)
-      // No additional check needed
-    } else if (mode === 'any') {
-      // Allow all, no check needed
     }
 
     // Build update data
@@ -247,7 +230,7 @@ export async function DELETE(request: NextRequest) {
     // Check delete permission and resolve scope mode
     const mode = await resolveNotepadScopeMode(request, { entity: 'notes', verb: 'delete' });
 
-    // Explicit branching on none/own/ldd/any
+    // Explicit branching on none/own/all
     if (mode === 'none') {
       return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
     } else if (mode === 'own') {
@@ -255,11 +238,6 @@ export async function DELETE(request: NextRequest) {
       if (!userId || existing.userId !== userId) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
       }
-    } else if (mode === 'ldd') {
-      // Notes don't have LDD fields, so ldd mode is same as any (allow all)
-      // No additional check needed
-    } else if (mode === 'any') {
-      // Allow all, no check needed
     }
 
     await db.delete(notes).where(eq(notes.id, id));

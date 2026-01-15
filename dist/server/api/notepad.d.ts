@@ -6,6 +6,8 @@ export declare const runtime = "nodejs";
  * List notes (with scope-based filtering)
  */
 export declare function GET(request: NextRequest): Promise<NextResponse<{
+    error: string;
+}> | NextResponse<{
     items: any;
     pagination: {
         page: number;
@@ -13,12 +15,10 @@ export declare function GET(request: NextRequest): Promise<NextResponse<{
         total: number;
         totalPages: number;
     };
-}> | NextResponse<{
-    error: string;
 }>>;
 /**
  * POST /api/notepad
  * Create a new note
  */
-export declare function POST(request: NextRequest): Promise<NextResponse<any>>;
+export declare function POST(request: NextRequest): Promise<Response>;
 //# sourceMappingURL=notepad.d.ts.map
