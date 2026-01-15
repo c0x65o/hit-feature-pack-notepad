@@ -2,6 +2,7 @@
 # Notepad with CRUD, list view, sharing, and per-user/global scope
 
 name: notepad
+title: Notepad
 description: Notepad feature pack with CRUD, list view, sharing, and per-user/global scope
 
 # Route definitions - mapped to React components
