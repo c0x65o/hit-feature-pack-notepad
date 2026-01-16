@@ -1,0 +1,92 @@
+permissions:
+  actions:
+    # Scope Policy Tree: Notepad (global) -> entity overrides.
+    #
+    # Scope modes:
+    # - none: deny all access for this verb/entity (hide pages + block APIs)
+    # - own: only owned records (based on userId field)
+    # - all: ignore scope (read/write/delete everything)
+    #
+    # These are mutually exclusive per node; the Security Groups UI renders them as dropdowns.
+    - key: notepad.read.scope.none
+      label: "Notepad Read Scope = None"
+      description: "Deny all note read access."
+      default_enabled: false
+    - key: notepad.read.scope.own
+      label: "Notepad Read Scope = Own"
+      description: "Read only notes you created."
+      default_enabled: false
+    - key: notepad.read.scope.all
+      label: "Notepad Read Scope = All"
+      description: "Read all notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.write.scope.none
+      label: "Notepad Write Scope = None"
+      description: "Deny all note write access."
+      default_enabled: false
+    - key: notepad.write.scope.own
+      label: "Notepad Write Scope = Own"
+      description: "Edit only notes you created."
+      default_enabled: false
+    - key: notepad.write.scope.all
+      label: "Notepad Write Scope = All"
+      description: "Edit notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.delete.scope.none
+      label: "Notepad Delete Scope = None"
+      description: "Deny all note delete access."
+      default_enabled: false
+    - key: notepad.delete.scope.own
+      label: "Notepad Delete Scope = Own"
+      description: "Delete only notes you created."
+      default_enabled: false
+    - key: notepad.delete.scope.all
+      label: "Notepad Delete Scope = All"
+      description: "Delete notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.notes.read.scope.none
+      label: "Notepad Notes Read Scope = None"
+      description: "Deny all note read access."
+      default_enabled: false
+    - key: notepad.notes.read.scope.own
+      label: "Notepad Notes Read Scope = Own"
+      description: "Read only notes you created."
+      default_enabled: false
+    - key: notepad.notes.read.scope.all
+      label: "Notepad Notes Read Scope = All"
+      description: "Read all notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.notes.write.scope.none
+      label: "Notepad Notes Write Scope = None"
+      description: "Deny all note write access."
+      default_enabled: false
+    - key: notepad.notes.write.scope.own
+      label: "Notepad Notes Write Scope = Own"
+      description: "Edit only notes you created."
+      default_enabled: false
+    - key: notepad.notes.write.scope.all
+      label: "Notepad Notes Write Scope = All"
+      description: "Edit notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.notes.delete.scope.none
+      label: "Notepad Notes Delete Scope = None"
+      description: "Deny all note delete access."
+      default_enabled: false
+    - key: notepad.notes.delete.scope.own
+      label: "Notepad Notes Delete Scope = Own"
+      description: "Delete only notes you created."
+      default_enabled: false
+    - key: notepad.notes.delete.scope.all
+      label: "Notepad Notes Delete Scope = All"
+      description: "Delete notes regardless of ownership."
+      default_enabled: false
+
+    - key: notepad.notes.create
+      label: "Create Note"
+      description: "Create a new note."
+      default_enabled: true
