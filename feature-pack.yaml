@@ -5,24 +5,20 @@ name: notepad
 title: Notepad
 description: Notepad feature pack with CRUD, list view, sharing, and per-user/global scope
 
-# Route definitions - mapped to React components
+# Route definitions - schema-driven UI pages
 routes:
   - path: /notepad
-    page: List
-    roles: []  # Empty = authenticated users only
-    authz: { entity: notes, verb: read }
+    page: EntityList
+    params: { entityKey: notepad.notes }
   - path: /notepad/new
-    page: Edit
-    roles: []
-    authz: { entity: notes, verb: write, require_create: true }
+    page: EntityEdit
+    params: { entityKey: notepad.notes }
   - path: /notepad/[id]
-    page: Detail
-    roles: []
-    authz: { entity: notes, verb: read }
+    page: EntityDetail
+    params: { entityKey: notepad.notes }
   - path: /notepad/[id]/edit
-    page: Edit
-    roles: []
-    authz: { entity: notes, verb: write }
+    page: EntityEdit
+    params: { entityKey: notepad.notes }
 
 # Navigation contributions - auto-added to shell sidebar
 nav:
@@ -53,25 +49,29 @@ schema:
   exports: [notes, Note, InsertNote, UpdateNote, noteAcls, NoteAcl, InsertNoteAcl, NOTE_PERMISSIONS]
 
 # API routes - handler-based pattern (recommended)
+# NOTE: CRUD endpoints for schema entities are generated from `schema/entities/* api.resource`
+# via the platform schema CRUD handler. Only "special" endpoints should be declared here.
 api:
   routes:
-    - path: /api/notepad
+    # Core CRUD endpoints (pack-owned)
+    - path: /api/notepad/notes
       methods: [GET, POST]
       handler: "@hit/feature-pack-notepad/server/api/notepad"
       description: "List notes (GET) or create note (POST)"
-    - path: /api/notepad/[id]
+    - path: /api/notepad/notes/[id]
       methods: [GET, PUT, DELETE]
       handler: "@hit/feature-pack-notepad/server/api/notepad-id"
       description: "Get, update, or delete a specific note"
-    - path: /api/notepad/[id]/share
+    # Special routes (share, ACL)
+    - path: /api/notepad/notes/[id]/share
       methods: [POST, DELETE]
       handler: "@hit/feature-pack-notepad/server/api/share"
       description: "Generate or revoke share link"
-    - path: /api/notepad/[id]/acl
+    - path: /api/notepad/notes/[id]/acl
       methods: [GET, POST]
       handler: "@hit/feature-pack-notepad/server/api/acl"
       description: "List ACLs (GET) or create ACL entry (POST) for a note"
-    - path: /api/notepad/[id]/acl/[aclId]
+    - path: /api/notepad/notes/[id]/acl/[aclId]
       methods: [DELETE]
       handler: "@hit/feature-pack-notepad/server/api/acl"
       description: "Delete an ACL entry"

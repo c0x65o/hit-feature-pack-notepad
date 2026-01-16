@@ -220,7 +220,7 @@ export declare const noteAcls: import("drizzle-orm/pg-core").PgTableWithColumns<
             tableName: "notepad_acls";
             dataType: "string";
             columnType: "PgEnumColumn";
-            data: "role" | "user" | "group";
+            data: "user" | "group" | "role";
             driverParam: string;
             notNull: true;
             hasDefault: false;

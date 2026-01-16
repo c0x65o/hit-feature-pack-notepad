@@ -1,10 +1,8 @@
 /**
  * Notepad Pages
  *
- * Using direct exports for optimal tree-shaking and code splitting.
- * Each component is only bundled when actually imported/used.
+ * This pack uses schema-driven UI. All pages (List, Detail, Edit)
+ * are generated automatically from schema/entities/notepad.notes.yaml.
  */
-export { NoteList, default as NoteListPage } from './List';
-export { NoteDetail, default as NoteDetailPage } from './Detail';
-export { NoteEdit, default as NoteEditPage } from './Edit';
+export {};
 //# sourceMappingURL=index.js.map

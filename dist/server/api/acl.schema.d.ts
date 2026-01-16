@@ -1,9 +1,9 @@
 import { z } from "zod";
 export declare const postBodySchema: z.ZodObject<{
     principalType: z.ZodEnum<{
-        role: "role";
         user: "user";
         group: "group";
+        role: "role";
     }>;
     principalId: z.ZodString;
     permissions: z.ZodArray<z.ZodEnum<{

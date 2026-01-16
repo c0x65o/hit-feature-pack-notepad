@@ -1,0 +1,92 @@
+version: 1
+
+entities:
+  notepad.notes:
+    meta:
+      titleSingular: Note
+      titlePlural: Notes
+      descriptionPlural: Manage your notes
+      routes:
+        root: /notepad
+        list: /notepad
+        new: /notepad/new
+        detail: /notepad/{id}
+        edit: /notepad/{id}/edit
+      breadcrumbs:
+        - { label: Notes, href: /notepad }
+      actions:
+        createLabel: New Note
+        editLabel: Edit Note
+        saveCreateLabel: Create Note
+        saveUpdateLabel: Update Note
+        cancelLabel: Cancel
+        deleteLabel: Delete
+        deleteConfirmTitle: Delete Note
+        deleteConfirmBody: Are you sure you want to delete "{title}"? This action cannot be undone.
+
+    # Schema-driven page security (source of truth for EntityList/Detail/Edit pages).
+    security:
+      list:
+        roles: []
+        authz: { entity: notes, verb: read }
+      detail:
+        roles: []
+        authz: { entity: notes, verb: read }
+      new:
+        roles: []
+        authz: { entity: notes, verb: write, require_create: true }
+      edit:
+        roles: []
+        authz: { entity: notes, verb: write }
+
+    api:
+      resource: notes
+
+    storage:
+      drizzleTable: notes
+
+    list:
+      tableId: notepad.notes
+      platforms: [web, mobile]
+      uiStateVersion: 1
+      pageSize: 25
+      initialSort:
+        sortBy: updatedAt
+        sortOrder: desc
+      sortWhitelist:
+        - title
+        - createdAt
+        - updatedAt
+      defaultVisibleOnly: true
+      initialColumnVisibility:
+        title: true
+        createdAt: true
+        updatedAt: true
+        isPublic: false
+      columns:
+        - title
+        - createdAt
+        - updatedAt
+        - isPublic
+        - key: actions
+          label: ""
+          sortable: false
+          hideable: false
+          align: right
+
+    fields:
+      id: { type: text, label: ID, readOnly: true }
+      title: { type: text, label: Title, required: true }
+      content: { type: textarea, label: Content }
+      userId: { type: text, label: Owner, readOnly: true }
+      isPublic: { type: boolean, label: Public }
+      shareToken: { type: text, label: Share Token, readOnly: true }
+      createdAt: { type: datetime, label: Created, readOnly: true }
+      updatedAt: { type: datetime, label: Updated, readOnly: true }
+
+    form:
+      sections:
+        - id: basic
+          title: Note
+          layout: { columns: 1 }
+          fields: [title, content]

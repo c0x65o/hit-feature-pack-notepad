@@ -1,0 +1,23 @@
+version: 1
+
+# Pack-owned "special" API routes (schema-visible).
+#
+# These are endpoints that are NOT the schema-generated CRUD routes derived from `entities.*.api.resource`.
+# They must be explicitly declared here so `hit schema validate` can enforce consistency and prevent drift.
+api:
+  routes:
+    # Share link management
+    - path: /api/notepad/notes/[id]/share
+      methods: [POST, DELETE]
+      handler: share
+      description: "Generate (POST) or revoke (DELETE) share link for a note"
+
+    # ACL management
+    - path: /api/notepad/notes/[id]/acl
+      methods: [GET, POST]
+      handler: acl
+      description: "List (GET) or add (POST) ACL entries for a note"
+    - path: /api/notepad/notes/[id]/acl/[aclId]
+      methods: [DELETE]
+      handler: acl
+      description: "Delete an ACL entry"
