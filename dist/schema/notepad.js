@@ -16,7 +16,7 @@ import { pgTable, varchar, text, timestamp, boolean, uuid, jsonb, index, unique,
  * Principal Types for ACL
  * Shared enum used across all feature packs (forms, vault, notepad, etc.)
  */
-export const principalTypeEnum = pgEnum("principal_type", ["user", "group", "role"]);
+export const principalTypeEnum = pgEnum("principal_type", ["user", "group", "role", "location", "division", "department"]);
 /**
  * Notes table - stores user notes
  *
