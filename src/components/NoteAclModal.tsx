@@ -110,6 +110,9 @@ export function NoteAclModal({ noteId, isOpen, onClose, onUpdate }: NoteAclModal
       users: true,
       groups: true,
       roles: true,
+      locations: { enabled: true, label: 'Location' },
+      divisions: { enabled: true, label: 'Division' },
+      departments: { enabled: true, label: 'Department' },
     },
     mode: 'hierarchical',
     hierarchicalPermissions: [
